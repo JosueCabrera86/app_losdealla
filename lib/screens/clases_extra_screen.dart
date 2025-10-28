@@ -4,8 +4,9 @@ import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 class ClasesExtraScreen extends StatefulWidget {
   final List<Map<String, dynamic>> material;
   final int nivelUsuario;
+  final VoidCallback? onClose;
 
-  const ClasesExtraScreen({super.key, required this.material, this.nivelUsuario = 20});
+  const ClasesExtraScreen({super.key, required this.material, this.nivelUsuario = 20,  this.onClose});
 
   @override
   State<ClasesExtraScreen> createState() => _ClasesExtraScreenState();
@@ -13,29 +14,17 @@ class ClasesExtraScreen extends StatefulWidget {
 
 class _ClasesExtraScreenState extends State<ClasesExtraScreen> {
   bool menuOpen = false;
-  Map<String, dynamic>? claseSeleccionada;
   int imagenIndex = 0;
   YoutubePlayerController? _youtubeController;
 
   final List<Map<String, dynamic>> clasesBase = [
-    {
-      'categoria': 1,
-      'tipo': 'pdf',
-      'title': 'Clase introductoria',
-      'pdf': [
-        'portadainfo.png',
-        'info9.png',
-        'info10.png',
-        'info11.png',
-        'info12.png',
-        'Frente-y-ojos-4.png'
-      ]
-    },
-    {'categoria': 1, 'tipo': 'video', 'title': 'Clase introductoria', 'video': 'u2OEmNMYTCw'},
-    {'categoria': 4, 'tipo': 'video', 'title': 'Clase 1', 'video': 'K4bLW4_-w9Q'},
-    {'categoria': 10, 'tipo': 'video', 'title': 'Clase 2', 'video': 'gYRVZobHOeE'},
-    {'categoria': 16, 'tipo': 'video', 'title': 'Clase 3', 'video': 'iBkVM0zyLRc'},
-    {'categoria': 21, 'tipo': 'video', 'title': 'Clase especial de Kinesiotape', 'video': 'iozMsfyRchA'},
+    { 'categoria': 1, 'tipo': "pdf", 'title': "Clase introductoria", 'pdf': ["portadainfo.png", "info9.png", "info10.png", "info11.png", "info12.png", "Frente-y-ojos-4.png"] },
+    { 'categoria': 1, 'tipo': "video", 'title': "Clase introductoria", 'video': "https://www.youtube.com/embed/u2OEmNMYTCw" },
+    { 'categoria': 4, 'tipo': "video", 'title': "Clase 1", 'video': "https://www.youtube.com/embed/K4bLW4_-w9Q" },
+    { 'categoria': 10, 'tipo': "video", 'title': "Clase 2", 'video': "https://www.youtube.com/embed/gYRVZobHOeE" },
+    { 'categoria': 16, 'tipo': "video", 'title': "Clase 3", 'video': "https://www.youtube.com/embed/iBkVM0zyLRc" },
+    { 'categoria': 21, 'tipo': "video", 'title': "Clase especial de Kinesiotape", 'video': "https://www.youtube.com/embed/iozMsfyRchA" },
+
   ];
 
   List<Map<String, dynamic>> get clasesFiltradas {
@@ -43,25 +32,14 @@ class _ClasesExtraScreenState extends State<ClasesExtraScreen> {
     return lista.where((m) => (m['categoria'] ?? 0) <= widget.nivelUsuario).toList();
   }
 
-  void toggleMenu() {
-    setState(() {
-      menuOpen = !menuOpen;
-      claseSeleccionada = null;
-      imagenIndex = 0;
-    });
-  }
-
-  void abrirModal(Map<String, dynamic> clase) {
-    setState(() {
-      claseSeleccionada = clase;
-      imagenIndex = 0;
-      if (clase['tipo'] == 'video') {
-        _youtubeController = YoutubePlayerController(
-          initialVideoId: clase['video'],
-          flags: const YoutubePlayerFlags(autoPlay: false),
-        );
-      }
-    });
+  void abrirModalClase(Map<String, dynamic> clase) {
+    imagenIndex = 0;
+    if (clase['tipo'] == 'video') {
+      _youtubeController = YoutubePlayerController(
+        initialVideoId: clase['video'],
+        flags: const YoutubePlayerFlags(autoPlay: false),
+      );
+    }
 
     showDialog(
       context: context,
@@ -74,14 +52,16 @@ class _ClasesExtraScreenState extends State<ClasesExtraScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Align(
-                  alignment: Alignment.topRight,
-                  child: IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () {
-                      _youtubeController?.pause();
-                      Navigator.pop(context);
-                    },
-                  ),
+                    alignment: Alignment.topRight,
+                    child: IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () {
+                        _youtubeController?.pause(); // Pausa video si hay
+                        Navigator.pop(context); // Cierra el modal
+                        // Si quieres ejecutar algo al cerrar, lo puedes descomentar
+                        // if (widget.onClose != null) widget.onClose!();
+                      },
+                    )
                 ),
                 Text(
                   clase['title'] ?? '',
@@ -96,34 +76,6 @@ class _ClasesExtraScreenState extends State<ClasesExtraScreen> {
                         'assets/imgsuscriptores/${clase['pdf'][imagenIndex]}',
                         fit: BoxFit.contain,
                       ),
-                      if (clase['pdf'].length > 1)
-                        Positioned(
-                          left: 0,
-                          top: 0,
-                          bottom: 0,
-                          child: IconButton(
-                            icon: const Icon(Icons.arrow_back_ios),
-                            onPressed: () {
-                              setStateDialog(() {
-                                imagenIndex = (imagenIndex - 1 + clase['pdf'].length) % clase['pdf'].length;
-                              });
-                            },
-                          ),
-                        ),
-                      if (clase['pdf'].length > 1)
-                        Positioned(
-                          right: 0,
-                          top: 0,
-                          bottom: 0,
-                          child: IconButton(
-                            icon: const Icon(Icons.arrow_forward_ios),
-                            onPressed: () {
-                              setStateDialog(() {
-                                imagenIndex = (imagenIndex + 1) % clase['pdf'].length;
-                              });
-                            },
-                          ),
-                        ),
                     ],
                   ),
                 if (clase['tipo'] == 'video' && clase['video'] != null)
@@ -141,7 +93,7 @@ class _ClasesExtraScreenState extends State<ClasesExtraScreen> {
     return Column(
       children: [
         ElevatedButton(
-          onPressed: toggleMenu,
+          onPressed: () => setState(() => menuOpen = !menuOpen),
           child: Text(menuOpen ? 'Cerrar clases' : 'Material extra Yoga Facial'),
         ),
         if (menuOpen)
@@ -149,13 +101,38 @@ class _ClasesExtraScreenState extends State<ClasesExtraScreen> {
             spacing: 8,
             runSpacing: 8,
             children: clasesFiltradas.map((clase) {
-              return ElevatedButton(
-                onPressed: () => abrirModal(clase),
-                child: Column(
-                  children: [
-                    Text(clase['title'] ?? ''),
-                    Text(clase['tipo'] == 'pdf' ? 'PDF' : 'Video'),
-                  ],
+              return GestureDetector(
+                onTap: () => abrirModalClase(clase),
+                child: Container(
+                  width: 140,
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    color: Colors.cyan[50],
+                    boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(2,2))],
+                  ),
+                  child: Column(
+                    children: [
+                      if (clase['tipo'] == 'pdf' && (clase['pdf']?.isNotEmpty ?? false))
+                        Image.asset(
+                          'assets/imgsuscriptores/${clase['pdf'][0]}',
+                          height: 80,
+                          fit: BoxFit.cover,
+                        ),
+                      if (clase['tipo'] == 'video')
+                        Container(
+                          height: 80,
+                          color: Colors.black12,
+                          child: const Icon(Icons.play_circle_fill, size: 40, color: Colors.red),
+                        ),
+                      const SizedBox(height: 4),
+                      Text(
+                        clase['title'] ?? '',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                    ],
+                  ),
                 ),
               );
             }).toList(),

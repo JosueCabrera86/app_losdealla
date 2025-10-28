@@ -1,157 +1,163 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:http/http.dart' as http;
 import 'modales_yoga.dart';
 
 class SuscriptoresYFScreen extends StatefulWidget {
-  const SuscriptoresYFScreen({super.key});
+  final int nivelUsuario;
+  final List<Map<String, dynamic>> materialRutinas;
+  final List<Map<String, dynamic>> materialMasajes;
+  final List<Map<String, dynamic>> materialClases;
+
+  const SuscriptoresYFScreen({
+    super.key,
+    this.nivelUsuario = 20,
+    this.materialRutinas = const [],
+    this.materialMasajes = const [],
+    this.materialClases = const [],
+  });
 
   @override
   State<SuscriptoresYFScreen> createState() => _SuscriptoresYFScreenState();
 }
 
 class _SuscriptoresYFScreenState extends State<SuscriptoresYFScreen> {
-  final storage = const FlutterSecureStorage();
+  String? modalAbierto; // 'rutinas', 'masajes', 'clases' o null
 
-  Map<String, List<Map<String, dynamic>>> material = {
-    'rutinas': [],
-    'masajes': [],
-    'clases': []
-  };
-  int nivelUsuario = 0;
-  String error = '';
-  bool loading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    fetchMaterial();
+  void abrirModal(String tipo) {
+    setState(() => modalAbierto = tipo);
   }
 
-  Future<void> fetchMaterial() async {
-    final token = await storage.read(key: 'token');
-    if (token == null) {
-      Navigator.pushReplacementNamed(context, '/login');
-      return;
-    }
-
-    setState(() => loading = true);
-
-    try {
-      final uri = Uri.parse('https://backendlda.onrender.com/api/yoga-facial/material');
-      final response = await http.get(uri, headers: {'Authorization': 'Bearer $token', 'Content-Type': 'application/json'});
-
-      if (response.statusCode != 200) {
-        setState(() {
-          error = 'Error del servidor: ${response.statusCode}';
-          loading = false;
-        });
-        return;
-      }
-
-      final data = jsonDecode(response.body) as Map<String, dynamic>;
-      final nivel = data['nivel'] as int? ?? 0;
-
-      List<Map<String, dynamic>> filtrar(List<dynamic>? items) {
-        if (items == null) return [];
-        return items.whereType<Map<String, dynamic>>().where((item) => (item['categoria'] ?? 0) <= nivel).toList();
-      }
-
-      setState(() {
-        nivelUsuario = nivel;
-        material['rutinas'] = filtrar(data['materialRutinas'] as List?);
-        material['masajes'] = filtrar(data['materialMasajes'] as List?);
-        material['clases'] = filtrar(data['materialClases'] as List?);
-        loading = false;
-      });
-    } catch (e) {
-      setState(() {
-        error = 'Error al conectar con el servidor: $e';
-        loading = false;
-      });
-    }
-  }
-
-  void handleLogout() async {
-    await storage.delete(key: 'token');
-    await storage.delete(key: 'rol');
-    Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+  void cerrarModal() {
+    setState(() => modalAbierto = null);
   }
 
   @override
   Widget build(BuildContext context) {
-    if (loading) return const Center(child: CircularProgressIndicator());
-
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // HERO
+            // Hero / Portada
             Stack(
               children: [
-                Image.asset('assets/images/faceyoga1.jpg', width: double.infinity, height: 400, fit: BoxFit.cover),
-                Container(width: double.infinity, height: 400, color: Colors.black.withOpacity(0.5)),
+                Image.asset(
+                  'assets/images/face_yoga_portada.jpg',
+                  width: double.infinity,
+                  height: 400,
+                  fit: BoxFit.cover,
+                ),
+                Container(
+                  width: double.infinity,
+                  height: 400,
+                  color: Colors.black.withOpacity(0.4),
+                ),
                 Positioned.fill(
-                  child: Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: const [
-                        Text('MATERIAL ADICIONAL', style: TextStyle(color: Colors.purpleAccent, fontSize: 32, fontWeight: FontWeight.bold)),
-                        SizedBox(height: 8),
-                        Text('Yoga Facial', style: TextStyle(color: Colors.pinkAccent, fontSize: 28, fontWeight: FontWeight.bold)),
-                      ],
-                    ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Text(
+                        'MATERIAL ADICIONAL',
+                        style: TextStyle(
+                          color: Colors.deepPurpleAccent,
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                          shadows: [Shadow(blurRadius: 4, color: Colors.black45, offset: Offset(2,2))],
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        'Yoga Facial',
+                        style: TextStyle(
+                          color: Colors.pinkAccent,
+                          fontSize: 24,
+                          fontWeight: FontWeight.w600,
+                          shadows: [Shadow(blurRadius: 4, color: Colors.black45, offset: Offset(2,2))],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
+
             const SizedBox(height: 16),
             Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Text(
-                '¡Hola! Bienvenido a este espacio para continuar tus sesiones de Yoga Facial.',
+                '¡Hola, nos da mucho gusto que estés aquí! Este espacio ha sido creado para que continúes con tus sesiones de Yoga Facial.',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16, color: Colors.purple[400]),
+                style: TextStyle(fontSize: 16, color: Colors.deepPurple[400]),
               ),
             ),
-            Wrap(
-              spacing: 12,
-              runSpacing: 12,
-              alignment: WrapAlignment.center,
-              children: [
-                if (material['masajes']!.isNotEmpty)
+
+            const SizedBox(height: 24),
+
+            // Solo mostrar botones si no hay modal abierto
+            if (modalAbierto == null)
+              Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                alignment: WrapAlignment.center,
+                children: [
                   ElevatedButton(
-                    onPressed: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => MasajesScreen(material: material['masajes']!, nivelUsuario: nivelUsuario)),
+                    onPressed: () => abrirModal('rutinas'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: modalAbierto == 'rutinas'
+                          ? Colors.deepPurpleAccent
+                          : Colors.deepPurple[100],
                     ),
-                    child: const Text('Masajes'),
+                    child: const Text('Rutinas de Yoga Facial'),
                   ),
-                if (material['rutinas']!.isNotEmpty)
                   ElevatedButton(
-                    onPressed: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => RutinasScreen(material: material['rutinas']!, nivelUsuario: nivelUsuario)),
+                    onPressed: () => abrirModal('masajes'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: modalAbierto == 'masajes'
+                          ? Colors.deepPurpleAccent
+                          : Colors.deepPurple[100],
                     ),
-                    child: const Text('Rutinas'),
+                    child: const Text('Masajes previos a tu rutina'),
                   ),
-                if (material['clases']!.isNotEmpty)
                   ElevatedButton(
-                    onPressed: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => ClasesExtraScreen(material: material['clases']!, nivelUsuario: nivelUsuario)),
+                    onPressed: () => abrirModal('clases'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: modalAbierto == 'clases'
+                          ? Colors.deepPurpleAccent
+                          : Colors.deepPurple[100],
                     ),
-                    child: const Text('Clases Extra'),
+                    child: const Text('Clases extra'),
                   ),
-              ],
-            ),
+                ],
+              ),
+
             const SizedBox(height: 16),
-            ElevatedButton(onPressed: handleLogout, style: ElevatedButton.styleFrom(backgroundColor: Colors.purple), child: const Text('Cerrar sesión')),
-            if (error.isNotEmpty)
+
+            // Secciones tipo modal
+            if (modalAbierto == 'rutinas')
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Text(error, style: const TextStyle(color: Colors.red)),
+                child: RutinasScreen(
+                  material: widget.materialRutinas,
+                  nivelUsuario: widget.nivelUsuario,
+                  onClose: cerrarModal,
+                ),
+              ),
+            if (modalAbierto == 'masajes')
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: MasajesScreen(
+                  material: widget.materialMasajes,
+                  nivelUsuario: widget.nivelUsuario,
+                  onClose: cerrarModal,
+                ),
+              ),
+            if (modalAbierto == 'clases')
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ClasesExtraScreen(
+                  material: widget.materialClases,
+                  nivelUsuario: widget.nivelUsuario,
+                  onClose: cerrarModal,
+                ),
               ),
           ],
         ),

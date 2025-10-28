@@ -1,3 +1,5 @@
+import 'package:app_losdealla/screens/suscriptoresyf_screen.dart';
+import 'package:app_losdealla/screens/vipcasino_screen.dart';
 import 'package:flutter/material.dart';
 import 'screens/splash_screen.dart';
 import 'screens/info_screen.dart';
@@ -25,8 +27,10 @@ class MyApp extends StatelessWidget {
         '/info': (context) => const InfoScreen(),
         '/home': (context) => const HomeScreen(),
         '/loginYoga': (context) =>  LoginScreen(tipo: 'yoga'),
-        '/loginCasino': (context) => LoginScreen(tipo: 'casino')
-        // '/login': (context) => const LoginScreen(), // luego se agrega login
+        '/loginCasino': (context) => LoginScreen(tipo: 'casino'),
+        '/suscriptoresyf': (context) => SuscriptoresYFScreen(),
+        '/vipcasino': (context) =>  VipCasinoScreen()
+
       },
     );
   }

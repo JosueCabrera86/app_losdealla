@@ -17,8 +17,6 @@ dependencies:
   youtube_player_flutter: ^9.1.3
   flutter_secure_storage: ^9.0.0
 
-
-
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -27,11 +25,4 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/images/logo_losdeallan.png
-    - assets/images/logo_losdealla.png
-    - assets/images/logo_manoentonada.png
-    - assets/images/escudoqroo.png
-    - assets/images/logo_sebien.png
-    - assets/images/logo_faro.png
-    - assets/images/yoga_facial.jpg
-    - assets/images/casino.png
+    - assets/images/

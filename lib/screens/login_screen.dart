@@ -35,11 +35,18 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
+      final url = Uri.parse('https://backendlda.onrender.com/login');
+      print('🔹 Intentando conexión con $url');
+      print('🔹 Datos enviados: $email / $password');
+
       final res = await http.post(
-        Uri.parse('https://backendlda.onrender.com/login'),
+        url,
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': email, 'password': password}),
       );
+
+      print('🔹 Status code: ${res.statusCode}');
+      print('🔹 Body: ${res.body}');
 
       final data = jsonDecode(res.body);
 
@@ -56,18 +63,13 @@ class _LoginScreenState extends State<LoginScreen> {
           Navigator.pushReplacementNamed(context, '/suscriptoresyf');
         }
       } else {
-        setState(() {
-          error = data['error'] ?? 'Credenciales incorrectas';
-        });
+        setState(() => error = data['error'] ?? 'Credenciales incorrectas');
       }
     } catch (e) {
-      setState(() {
-        error = 'Error al conectar con el servidor';
-      });
+      print('🚨 Error al conectar con el servidor: $e');
+      setState(() => error = 'Error al conectar con el servidor: $e');
     } finally {
-      setState(() {
-        loading = false;
-      });
+      setState(() => loading = false);
     }
   }
 
