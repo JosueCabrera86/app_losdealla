@@ -1,6 +1,7 @@
-import 'package:flutter/material.dart';
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class LoginScreen extends StatefulWidget {
   final String tipo; // 'yoga' o 'casino'
@@ -13,11 +14,21 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  final storage = const FlutterSecureStorage();
+
   bool showPassword = false;
-  String? error;
   bool loading = false;
+  String? error;
 
   Future<void> handleSubmit() async {
+    final email = emailController.text.trim();
+    final password = passwordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      setState(() => error = 'Por favor llena todos los campos');
+      return;
+    }
+
     setState(() {
       error = null;
       loading = true;
@@ -27,34 +38,31 @@ class _LoginScreenState extends State<LoginScreen> {
       final res = await http.post(
         Uri.parse('https://backendlda.onrender.com/login'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'email': emailController.text,
-          'password': passwordController.text,
-        }),
+        body: jsonEncode({'email': email, 'password': password}),
       );
 
       final data = jsonDecode(res.body);
 
-      if (res.statusCode == 200) {
-        // Guardar token en memoria temporal
-        // (puedes usar SharedPreferences si quieres persistencia)
-        // Aquí solo simulo
+      if (res.statusCode == 200 && data['token'] != null) {
         final token = data['token'];
+        final rol = data['rol'] ?? widget.tipo;
 
-        // Navegar según tipo
-        if (widget.tipo == 'casino' || data['rol'] == 'casino') {
-          Navigator.pushReplacementNamed(context, '/casino');
+        await storage.write(key: 'token', value: token);
+        await storage.write(key: 'rol', value: rol);
+
+        if (rol == 'casino' || widget.tipo == 'casino') {
+          Navigator.pushReplacementNamed(context, '/vipcasino');
         } else {
           Navigator.pushReplacementNamed(context, '/suscriptoresyf');
         }
       } else {
         setState(() {
-          error = data['error'] ?? 'Error en el inicio de sesión';
+          error = data['error'] ?? 'Credenciales incorrectas';
         });
       }
     } catch (e) {
       setState(() {
-        error = 'Error en el servidor';
+        error = 'Error al conectar con el servidor';
       });
     } finally {
       setState(() {
@@ -78,104 +86,50 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
-        child: Center(
-          child: Column(
-            children: [
-              const SizedBox(height: 20),
-              Text(
-                'Inicia sesión para continuar',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: colorLila,
-                ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const SizedBox(height: 20),
+            Text(
+              'Inicia sesión para continuar',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: colorLila),
+            ),
+            const SizedBox(height: 24),
+            TextField(
+              controller: emailController,
+              keyboardType: TextInputType.emailAddress,
+              decoration: InputDecoration(
+                hintText: 'Email',
+                hintStyle: TextStyle(color: colorLila.withOpacity(0.6)),
+                enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: colorLila), borderRadius: BorderRadius.circular(8)),
+                focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: colorAzul, width: 2), borderRadius: BorderRadius.circular(8)),
               ),
-              const SizedBox(height: 24),
-
-              // 🟣 Campo Email
-              TextField(
-                controller: emailController,
-                keyboardType: TextInputType.emailAddress,
-                decoration: InputDecoration(
-                  hintText: 'Email',
-                  hintStyle: TextStyle(color: colorLila.withOpacity(0.6)),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: colorLila),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: colorAzul, width: 2),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: passwordController,
+              obscureText: !showPassword,
+              decoration: InputDecoration(
+                hintText: 'Contraseña',
+                hintStyle: TextStyle(color: colorLila.withOpacity(0.6)),
+                suffixIcon: IconButton(
+                  icon: Icon(showPassword ? Icons.visibility_off : Icons.visibility, color: colorLila),
+                  onPressed: () => setState(() => showPassword = !showPassword),
                 ),
+                enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: colorLila), borderRadius: BorderRadius.circular(8)),
+                focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: colorAzul, width: 2), borderRadius: BorderRadius.circular(8)),
               ),
-              const SizedBox(height: 16),
-
-              // 🟣 Campo Contraseña
-              TextField(
-                controller: passwordController,
-                obscureText: !showPassword,
-                decoration: InputDecoration(
-                  hintText: 'Contraseña',
-                  hintStyle: TextStyle(color: colorLila.withOpacity(0.6)),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      showPassword ? Icons.visibility_off : Icons.visibility,
-                      color: colorLila,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        showPassword = !showPassword;
-                      });
-                    },
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: colorLila),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: colorAzul, width: 2),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 12),
-
-              // 🛑 Error message
-              if (error != null)
-                Text(
-                  error!,
-                  style: const TextStyle(color: Colors.red, fontSize: 14),
-                ),
-
-              const SizedBox(height: 24),
-
-              // 🟢 Botón iniciar sesión
-              ElevatedButton(
-                onPressed: loading ? null : handleSubmit,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: colorLila,
-                  padding:
-                  const EdgeInsets.symmetric(horizontal: 50, vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                child: loading
-                    ? const CircularProgressIndicator(
-                  color: Colors.white,
-                )
-                    : const Text(
-                  'Iniciar sesión',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                  ),
-                ),
-              ),
-            ],
-          ),
+            ),
+            const SizedBox(height: 12),
+            if (error != null) Text(error!, textAlign: TextAlign.center, style: const TextStyle(color: Colors.red, fontSize: 14)),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: loading ? null : handleSubmit,
+              style: ElevatedButton.styleFrom(backgroundColor: colorLila, padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+              child: loading ? const CircularProgressIndicator(color: Colors.white) : const Text('Iniciar sesión', style: TextStyle(color: Colors.white, fontSize: 16)),
+            ),
+          ],
         ),
       ),
     );

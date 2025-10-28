@@ -1,7 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
-import 'modales_yoga.dart'; // Importa tus widgets: MasajesScreen, RutinasScreen, ClasesExtraScreen
+import 'modales_yoga.dart';
 
 class SuscriptoresYFScreen extends StatefulWidget {
   const SuscriptoresYFScreen({super.key});
@@ -11,6 +12,8 @@ class SuscriptoresYFScreen extends StatefulWidget {
 }
 
 class _SuscriptoresYFScreenState extends State<SuscriptoresYFScreen> {
+  final storage = const FlutterSecureStorage();
+
   Map<String, List<Map<String, dynamic>>> material = {
     'rutinas': [],
     'masajes': [],
@@ -27,21 +30,17 @@ class _SuscriptoresYFScreenState extends State<SuscriptoresYFScreen> {
   }
 
   Future<void> fetchMaterial() async {
-    final token = ''; // Recupera tu token seguro
-    if (token.isEmpty) {
-      setState(() {
-        error = 'No estás autorizado. Por favor inicia sesión.';
-        loading = false;
-      });
+    final token = await storage.read(key: 'token');
+    if (token == null) {
+      Navigator.pushReplacementNamed(context, '/login');
       return;
     }
 
+    setState(() => loading = true);
+
     try {
       final uri = Uri.parse('https://backendlda.onrender.com/api/yoga-facial/material');
-      final response = await http.get(uri, headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      });
+      final response = await http.get(uri, headers: {'Authorization': 'Bearer $token', 'Content-Type': 'application/json'});
 
       if (response.statusCode != 200) {
         setState(() {
@@ -56,19 +55,14 @@ class _SuscriptoresYFScreenState extends State<SuscriptoresYFScreen> {
 
       List<Map<String, dynamic>> filtrar(List<dynamic>? items) {
         if (items == null) return [];
-        return items
-            .whereType<Map<String, dynamic>>()
-            .where((item) => (item['categoria'] ?? 0) <= nivel)
-            .toList();
+        return items.whereType<Map<String, dynamic>>().where((item) => (item['categoria'] ?? 0) <= nivel).toList();
       }
 
       setState(() {
         nivelUsuario = nivel;
-        material = {
-          'rutinas': filtrar(data['materialRutinas'] as List?),
-          'masajes': filtrar(data['materialMasajes'] as List?),
-          'clases': filtrar(data['materialClases'] as List?),
-        };
+        material['rutinas'] = filtrar(data['materialRutinas'] as List?);
+        material['masajes'] = filtrar(data['materialMasajes'] as List?);
+        material['clases'] = filtrar(data['materialClases'] as List?);
         loading = false;
       });
     } catch (e) {
@@ -79,8 +73,10 @@ class _SuscriptoresYFScreenState extends State<SuscriptoresYFScreen> {
     }
   }
 
-  void handleLogout() {
-    Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+  void handleLogout() async {
+    await storage.delete(key: 'token');
+    await storage.delete(key: 'rol');
+    Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
   }
 
   @override
@@ -91,48 +87,25 @@ class _SuscriptoresYFScreenState extends State<SuscriptoresYFScreen> {
       body: SingleChildScrollView(
         child: Column(
           children: [
+            // HERO
             Stack(
               children: [
-                Image.asset(
-                  'assets/images/faceyoga1.jpg',
-                  width: double.infinity,
-                  height: 400,
-                  fit: BoxFit.cover,
-                ),
-                Container(
-                  width: double.infinity,
-                  height: 400,
-                  color: Colors.black.withOpacity(0.5),
-                ),
+                Image.asset('assets/images/faceyoga1.jpg', width: double.infinity, height: 400, fit: BoxFit.cover),
+                Container(width: double.infinity, height: 400, color: Colors.black.withOpacity(0.5)),
                 Positioned.fill(
                   child: Center(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: const [
-                        Text(
-                          'MATERIAL ADICIONAL',
-                          style: TextStyle(
-                            color: Colors.purpleAccent,
-                            fontSize: 32,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                        Text('MATERIAL ADICIONAL', style: TextStyle(color: Colors.purpleAccent, fontSize: 32, fontWeight: FontWeight.bold)),
                         SizedBox(height: 8),
-                        Text(
-                          'Yoga Facial',
-                          style: TextStyle(
-                            color: Colors.pinkAccent,
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                        Text('Yoga Facial', style: TextStyle(color: Colors.pinkAccent, fontSize: 28, fontWeight: FontWeight.bold)),
                       ],
                     ),
                   ),
                 ),
               ],
             ),
-
             const SizedBox(height: 16),
             Padding(
               padding: const EdgeInsets.all(16.0),
@@ -142,7 +115,6 @@ class _SuscriptoresYFScreenState extends State<SuscriptoresYFScreen> {
                 style: TextStyle(fontSize: 16, color: Colors.purple[400]),
               ),
             ),
-
             Wrap(
               spacing: 12,
               runSpacing: 12,
@@ -152,12 +124,7 @@ class _SuscriptoresYFScreenState extends State<SuscriptoresYFScreen> {
                   ElevatedButton(
                     onPressed: () => Navigator.push(
                       context,
-                      MaterialPageRoute(
-                        builder: (_) => MasajesScreen(
-                          material: material['masajes']!,
-                          nivelUsuario: nivelUsuario,
-                        ),
-                      ),
+                      MaterialPageRoute(builder: (_) => MasajesScreen(material: material['masajes']!, nivelUsuario: nivelUsuario)),
                     ),
                     child: const Text('Masajes'),
                   ),
@@ -165,12 +132,7 @@ class _SuscriptoresYFScreenState extends State<SuscriptoresYFScreen> {
                   ElevatedButton(
                     onPressed: () => Navigator.push(
                       context,
-                      MaterialPageRoute(
-                        builder: (_) => RutinasScreen(
-                          material: material['rutinas']!,
-                          nivelUsuario: nivelUsuario,
-                        ),
-                      ),
+                      MaterialPageRoute(builder: (_) => RutinasScreen(material: material['rutinas']!, nivelUsuario: nivelUsuario)),
                     ),
                     child: const Text('Rutinas'),
                   ),
@@ -178,25 +140,14 @@ class _SuscriptoresYFScreenState extends State<SuscriptoresYFScreen> {
                   ElevatedButton(
                     onPressed: () => Navigator.push(
                       context,
-                      MaterialPageRoute(
-                        builder: (_) => ClasesExtraScreen(
-                          material: material['clases']!,
-                          nivelUsuario: nivelUsuario,
-                        ),
-                      ),
+                      MaterialPageRoute(builder: (_) => ClasesExtraScreen(material: material['clases']!, nivelUsuario: nivelUsuario)),
                     ),
                     child: const Text('Clases Extra'),
                   ),
               ],
             ),
-
             const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: handleLogout,
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
-              child: const Text('Cerrar sesión'),
-            ),
-
+            ElevatedButton(onPressed: handleLogout, style: ElevatedButton.styleFrom(backgroundColor: Colors.purple), child: const Text('Cerrar sesión')),
             if (error.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.all(8.0),

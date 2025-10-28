@@ -1,6 +1,8 @@
-
-import 'package:app_losdealla/screens/modales_casino.dart';
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:http/http.dart' as http;
+import 'modales_casino.dart';
 
 class VipCasinoScreen extends StatefulWidget {
   const VipCasinoScreen({super.key});
@@ -10,6 +12,8 @@ class VipCasinoScreen extends StatefulWidget {
 }
 
 class _VipCasinoScreenState extends State<VipCasinoScreen> {
+  final storage = const FlutterSecureStorage();
+
   int nivelUsuario = 0;
   bool loading = true;
   String error = '';
@@ -27,62 +31,40 @@ class _VipCasinoScreenState extends State<VipCasinoScreen> {
   }
 
   Future<void> fetchMaterial() async {
-    final token = ''; // Aquí usarías SecureStorage o SharedPreferences
-    if (token.isEmpty) {
-      setState(() {
-        error = 'No estás autorizado. Por favor inicia sesión.';
-        loading = false;
-      });
+    final token = await storage.read(key: 'token');
+    if (token == null) {
+      Navigator.pushReplacementNamed(context, '/login');
       return;
     }
 
+    setState(() => loading = true);
+
     try {
-      // Simulación de fetch desde tu backend
-      // Reemplaza con tu llamada http real
-      final data = {
-        'nivel': 4,
-        'materialBasico': [
-          {
-            'categoria': 1,
-            'tipo': 'video',
-            'title': 'Bases',
-            'video': 'https://www.youtube.com/embed/u2OEmNMYTCw'
-          },
-          {
-            'categoria': 1,
-            'tipo': 'video',
-            'title': 'Vueltas',
-            'video': 'https://www.youtube.com/embed/K4bLW4_-w9Q'
-          },
-        ],
-        'materialPrincipiante': [],
-        'materialIntermedio': [],
-        'materialAvanzado': [],
-      };
+      final uri = Uri.parse('https://backendlda.onrender.com/api/casino/material');
+      final response = await http.get(uri, headers: {'Authorization': 'Bearer $token', 'Content-Type': 'application/json'});
+
+      if (response.statusCode != 200) {
+        setState(() {
+          error = 'Error del servidor: ${response.statusCode}';
+          loading = false;
+        });
+        return;
+      }
+
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      final nivel = data['nivel'] as int? ?? 0;
+
+      List<Map<String, dynamic>> filtrar(List<dynamic>? items) {
+        if (items == null) return [];
+        return items.whereType<Map<String, dynamic>>().where((item) => (item['categoria'] ?? 0) <= nivel).toList();
+      }
 
       setState(() {
-        nivelUsuario = (data['nivel'] ?? 0) as int;
-
-        material['basico'] = List<Map<String, dynamic>>.from(
-          ((data['materialBasico'] ?? []) as List)
-              .where((item) => (item['categoria'] ?? 0) <= nivelUsuario),
-        );
-
-        material['principiante'] = List<Map<String, dynamic>>.from(
-          ((data['materialPrincipiante'] ?? []) as List)
-              .where((item) => (item['categoria'] ?? 0) <= nivelUsuario),
-        );
-
-        material['intermedio'] = List<Map<String, dynamic>>.from(
-          ((data['materialIntermedio'] ?? []) as List)
-              .where((item) => (item['categoria'] ?? 0) <= nivelUsuario),
-        );
-
-        material['avanzado'] = List<Map<String, dynamic>>.from(
-          ((data['materialAvanzado'] ?? []) as List)
-              .where((item) => (item['categoria'] ?? 0) <= nivelUsuario),
-        );
-
+        nivelUsuario = nivel;
+        material['basico'] = filtrar(data['materialBasico'] as List?);
+        material['principiante'] = filtrar(data['materialPrincipiante'] as List?);
+        material['intermedio'] = filtrar(data['materialIntermedio'] as List?);
+        material['avanzado'] = filtrar(data['materialAvanzado'] as List?);
         loading = false;
       });
     } catch (e) {
@@ -93,9 +75,10 @@ class _VipCasinoScreenState extends State<VipCasinoScreen> {
     }
   }
 
-  void handleLogout() {
-    // Limpiar token y volver al login
-    Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+  void handleLogout() async {
+    await storage.delete(key: 'token');
+    await storage.delete(key: 'rol');
+    Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
   }
 
   @override
@@ -106,40 +89,19 @@ class _VipCasinoScreenState extends State<VipCasinoScreen> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Hero
+            // HERO
             Stack(
               children: [
-                Image.asset(
-                  'assets/vipcasino/portada.jpg',
-                  width: double.infinity,
-                  height: 400,
-                  fit: BoxFit.cover,
-                ),
-                Container(
-                  width: double.infinity,
-                  height: 400,
-                  color: Colors.black.withOpacity(0.6),
-                ),
+                Image.asset('assets/vipcasino/portada.jpg', width: double.infinity, height: 400, fit: BoxFit.cover),
+                Container(width: double.infinity, height: 400, color: Colors.black.withOpacity(0.6)),
                 Positioned.fill(
                   child: Center(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: const [
-                        Text(
-                          'MATERIAL ADICIONAL',
-                          style: TextStyle(
-                              color: Colors.cyanAccent,
-                              fontSize: 32,
-                              fontWeight: FontWeight.bold),
-                        ),
+                        Text('MATERIAL ADICIONAL', style: TextStyle(color: Colors.cyanAccent, fontSize: 32, fontWeight: FontWeight.bold)),
                         SizedBox(height: 8),
-                        Text(
-                          'Formación de Profesores de Casino',
-                          style: TextStyle(
-                              color: Colors.purpleAccent,
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold),
-                        ),
+                        Text('Formación de Profesores de Casino', style: TextStyle(color: Colors.purpleAccent, fontSize: 28, fontWeight: FontWeight.bold)),
                       ],
                     ),
                   ),
@@ -157,30 +119,10 @@ class _VipCasinoScreenState extends State<VipCasinoScreen> {
               ),
             ),
 
-            // Widgets por nivel
-            if (nivelUsuario >= 1)
-              NivelBasico(
-                material: material['basico']!,
-                nivelUsuario: nivelUsuario,
-              ),
-
-            if (nivelUsuario >= 2)
-              NivelPrincipiante(
-                material: material['principiante']!,
-                nivelUsuario: nivelUsuario,
-              ),
-
-            if (nivelUsuario >= 3)
-              NivelIntermedio(
-                material: material['intermedio']!,
-                nivelUsuario: nivelUsuario,
-              ),
-
-            if (nivelUsuario >= 4)
-              NivelAvanzado(
-                material: material['avanzado']!,
-                nivelUsuario: nivelUsuario,
-              ),
+            if (nivelUsuario >= 1) NivelBasico(material: material['basico']!, nivelUsuario: nivelUsuario),
+            if (nivelUsuario >= 2) NivelPrincipiante(material: material['principiante']!, nivelUsuario: nivelUsuario),
+            if (nivelUsuario >= 3) NivelIntermedio(material: material['intermedio']!, nivelUsuario: nivelUsuario),
+            if (nivelUsuario >= 4) NivelAvanzado(material: material['avanzado']!, nivelUsuario: nivelUsuario),
 
             const SizedBox(height: 16),
             ElevatedButton(
