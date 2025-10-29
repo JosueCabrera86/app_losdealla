@@ -2,90 +2,58 @@ import 'package:flutter/material.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class ClasesExtraScreen extends StatefulWidget {
-  final List<Map<String, dynamic>> material;
+  final List<dynamic> material;
   final int nivelUsuario;
-  final VoidCallback? onClose;
+  final VoidCallback onClose;
 
-  const ClasesExtraScreen({super.key, required this.material, this.nivelUsuario = 20,  this.onClose});
+  const ClasesExtraScreen({
+    super.key,
+    required this.material,
+    required this.nivelUsuario,
+    required this.onClose,
+  });
 
   @override
   State<ClasesExtraScreen> createState() => _ClasesExtraScreenState();
 }
 
 class _ClasesExtraScreenState extends State<ClasesExtraScreen> {
-  bool menuOpen = false;
-  int imagenIndex = 0;
-  YoutubePlayerController? _youtubeController;
+  int? _imagenIndex;
+  Map<String, dynamic>? _claseSeleccionada;
 
   final List<Map<String, dynamic>> clasesBase = [
-    { 'categoria': 1, 'tipo': "pdf", 'title': "Clase introductoria", 'pdf': ["portadainfo.png", "info9.png", "info10.png", "info11.png", "info12.png", "Frente-y-ojos-4.png"] },
-    { 'categoria': 1, 'tipo': "video", 'title': "Clase introductoria", 'video': "https://www.youtube.com/embed/u2OEmNMYTCw" },
-    { 'categoria': 4, 'tipo': "video", 'title': "Clase 1", 'video': "https://www.youtube.com/embed/K4bLW4_-w9Q" },
-    { 'categoria': 10, 'tipo': "video", 'title': "Clase 2", 'video': "https://www.youtube.com/embed/gYRVZobHOeE" },
-    { 'categoria': 16, 'tipo': "video", 'title': "Clase 3", 'video': "https://www.youtube.com/embed/iBkVM0zyLRc" },
-    { 'categoria': 21, 'tipo': "video", 'title': "Clase especial de Kinesiotape", 'video': "https://www.youtube.com/embed/iozMsfyRchA" },
-
+    {'categoria': 1, 'tipo': 'pdf', 'title': 'Clase introductoria', 'pdf': ['portadainfo.png','info9.png','info10.png','info11.png','info12.png','Frente-y-ojos-4.png']},
+    {'categoria': 1, 'tipo': 'video', 'title': 'Clase introductoria', 'video': 'u2OEmNMYTCw'},
+    {'categoria': 4, 'tipo': 'video', 'title': 'Clase 1', 'video': 'K4bLW4_-w9Q'},
+    {'categoria': 10, 'tipo': 'video', 'title': 'Clase 2', 'video': 'gYRVZobHOeE'},
+    {'categoria': 16, 'tipo': 'video', 'title': 'Clase 3', 'video': 'iBkVM0zyLRc'},
+    {'categoria': 21, 'tipo': 'video', 'title': 'Clase especial de Kinesiotape', 'video': 'iozMsfyRchA'},
   ];
 
-  List<Map<String, dynamic>> get clasesFiltradas {
-    final lista = widget.material.isNotEmpty ? widget.material : clasesBase;
-    return lista.where((m) => (m['categoria'] ?? 0) <= widget.nivelUsuario).toList();
+  List<Map<String, dynamic>> get clasesFiltradas => clasesBase
+      .where((c) => (c['categoria'] ?? 0) <= widget.nivelUsuario)
+      .toList();
+
+  void abrirClase(Map<String, dynamic> clase) {
+    setState(() {
+      _claseSeleccionada = clase;
+      _imagenIndex = 0;
+    });
   }
 
-  void abrirModalClase(Map<String, dynamic> clase) {
-    imagenIndex = 0;
-    if (clase['tipo'] == 'video') {
-      _youtubeController = YoutubePlayerController(
-        initialVideoId: clase['video'],
-        flags: const YoutubePlayerFlags(autoPlay: false),
-      );
-    }
+  void cerrarClase() {
+    setState(() {
+      _claseSeleccionada = null;
+      _imagenIndex = null;
+    });
+  }
 
-    showDialog(
-      context: context,
-      builder: (_) => StatefulBuilder(builder: (context, setStateDialog) {
-        return AlertDialog(
-          contentPadding: EdgeInsets.zero,
-          content: SizedBox(
-            width: double.maxFinite,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Align(
-                    alignment: Alignment.topRight,
-                    child: IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () {
-                        _youtubeController?.pause(); // Pausa video si hay
-                        Navigator.pop(context); // Cierra el modal
-                        // Si quieres ejecutar algo al cerrar, lo puedes descomentar
-                        // if (widget.onClose != null) widget.onClose!();
-                      },
-                    )
-                ),
-                Text(
-                  clase['title'] ?? '',
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 10),
-                if (clase['tipo'] == 'pdf' && (clase['pdf']?.length ?? 0) > 0)
-                  Stack(
-                    children: [
-                      Image.asset(
-                        'assets/imgsuscriptores/${clase['pdf'][imagenIndex]}',
-                        fit: BoxFit.contain,
-                      ),
-                    ],
-                  ),
-                if (clase['tipo'] == 'video' && clase['video'] != null)
-                  YoutubePlayer(controller: _youtubeController!),
-              ],
-            ),
-          ),
-        );
-      }),
-    );
+  void cambiarImagen(int dir) {
+    if (_claseSeleccionada?['pdf'] == null) return;
+    final total = (_claseSeleccionada!['pdf'] as List).length;
+    setState(() {
+      _imagenIndex = (_imagenIndex! + dir + total) % total;
+    });
   }
 
   @override
@@ -93,49 +61,89 @@ class _ClasesExtraScreenState extends State<ClasesExtraScreen> {
     return Column(
       children: [
         ElevatedButton(
-          onPressed: () => setState(() => menuOpen = !menuOpen),
-          child: Text(menuOpen ? 'Cerrar clases' : 'Material extra Yoga Facial'),
+          onPressed: widget.onClose,
+          child: const Text('Cerrar clases extra'),
         ),
-        if (menuOpen)
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: clasesFiltradas.map((clase) {
-              return GestureDetector(
-                onTap: () => abrirModalClase(clase),
-                child: Container(
-                  width: 140,
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    color: Colors.cyan[50],
-                    boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(2,2))],
-                  ),
-                  child: Column(
-                    children: [
-                      if (clase['tipo'] == 'pdf' && (clase['pdf']?.isNotEmpty ?? false))
-                        Image.asset(
-                          'assets/imgsuscriptores/${clase['pdf'][0]}',
-                          height: 80,
-                          fit: BoxFit.cover,
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: clasesFiltradas.length,
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            mainAxisSpacing: 8,
+            crossAxisSpacing: 8,
+            childAspectRatio: 1.2,
+          ),
+          itemBuilder: (context, index) {
+            final clase = clasesFiltradas[index];
+            return ElevatedButton(
+              onPressed: () => abrirClase(clase),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(clase['title']),
+                  Text(clase['tipo'] == 'pdf' ? 'PDF' : 'Video'),
+                ],
+              ),
+            );
+          },
+        ),
+        if (_claseSeleccionada != null)
+          Center(
+            child: Dialog(
+              insetPadding: const EdgeInsets.all(16),
+              child: SizedBox(
+                width: double.infinity,
+                height: 400,
+                child: Stack(
+                  children: [
+                    if (_claseSeleccionada!['tipo'] == 'pdf')
+                      Center(
+                        child: Image.asset(
+                          'assets/images/${_claseSeleccionada!['pdf'][_imagenIndex!]}',
+                          fit: BoxFit.contain,
                         ),
-                      if (clase['tipo'] == 'video')
-                        Container(
-                          height: 80,
-                          color: Colors.black12,
-                          child: const Icon(Icons.play_circle_fill, size: 40, color: Colors.red),
-                        ),
-                      const SizedBox(height: 4),
-                      Text(
-                        clase['title'] ?? '',
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(fontSize: 12),
                       ),
-                    ],
-                  ),
+                    if (_claseSeleccionada!['tipo'] == 'video')
+                      YoutubePlayer(
+                        controller: YoutubePlayerController(
+                          initialVideoId: _claseSeleccionada!['video'],
+                          flags: const YoutubePlayerFlags(autoPlay: false),
+                        ),
+                        showVideoProgressIndicator: true,
+                      ),
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: cerrarClase,
+                      ),
+                    ),
+                    if (_claseSeleccionada!['tipo'] == 'pdf' &&
+                        (_claseSeleccionada!['pdf'] as List).length > 1)
+                      Positioned(
+                        left: 8,
+                        top: 180,
+                        child: IconButton(
+                          icon: const Icon(Icons.chevron_left, size: 32),
+                          onPressed: () => cambiarImagen(-1),
+                        ),
+                      ),
+                    if (_claseSeleccionada!['tipo'] == 'pdf' &&
+                        (_claseSeleccionada!['pdf'] as List).length > 1)
+                      Positioned(
+                        right: 8,
+                        top: 180,
+                        child: IconButton(
+                          icon: const Icon(Icons.chevron_right, size: 32),
+                          onPressed: () => cambiarImagen(1),
+                        ),
+                      ),
+                  ],
                 ),
-              );
-            }).toList(),
+              ),
+            ),
           ),
       ],
     );

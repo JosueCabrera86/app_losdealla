@@ -1,43 +1,130 @@
 import 'package:flutter/material.dart';
-import 'modales_yoga.dart';
+import 'modales_yoga.dart'; // RutinasScreen, MasajesScreen, ClasesExtraScreen
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class SuscriptoresYFScreen extends StatefulWidget {
-  final int nivelUsuario;
-  final List<Map<String, dynamic>> materialRutinas;
-  final List<Map<String, dynamic>> materialMasajes;
-  final List<Map<String, dynamic>> materialClases;
-
-  const SuscriptoresYFScreen({
-    super.key,
-    this.nivelUsuario = 20,
-    this.materialRutinas = const [],
-    this.materialMasajes = const [],
-    this.materialClases = const [],
-  });
+  const SuscriptoresYFScreen({super.key});
 
   @override
   State<SuscriptoresYFScreen> createState() => _SuscriptoresYFScreenState();
 }
 
 class _SuscriptoresYFScreenState extends State<SuscriptoresYFScreen> {
-  String? modalAbierto; // 'rutinas', 'masajes', 'clases' o null
+  final storage = const FlutterSecureStorage();
 
-  void abrirModal(String tipo) {
-    setState(() => modalAbierto = tipo);
+  int nivelUsuario = 0;
+  List<String> rutinas = [];
+  List<String> masajes = [];
+  List<String> clases = [];
+  String? modalAbierto;
+  String? error;
+  bool cargando = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchMaterial();
   }
 
-  void cerrarModal() {
-    setState(() => modalAbierto = null);
+  Future<void> fetchMaterial() async {
+    setState(() {
+      cargando = true;
+      error = null;
+    });
+
+    final token = (await storage.read(key: 'token'))?.trim() ?? '';
+    print('🔹 Token leido en SuscriptoresYFScreen: $token');
+
+    if (token.isEmpty) {
+      setState(() {
+        error = "No estás autorizado. Por favor inicia sesión.";
+        cargando = false;
+      });
+      Future.microtask(() {
+        Navigator.pushReplacementNamed(context, '/login', arguments: {'tipo': 'yoga'});
+      });
+      return;
+    }
+
+    try {
+      final uri = Uri.parse("https://backendlda.onrender.com/api/yoga-facial/material");
+      final response = await http.get(uri, headers: {"Authorization": "Bearer $token"});
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        print('🔹 Datos recibidos del backend: $data');
+
+        final nivel = data['nivel'] ?? 0;
+        final material = (data['material'] ?? []) as List;
+
+        // Filtrar y separar material según palabras clave
+        final filteredMaterial = material
+            .map((e) => e.toString().trim())
+            .where((e) => e.isNotEmpty)
+            .toList();
+
+        final rutinasData = filteredMaterial
+            .where((item) => item.toLowerCase().contains('clase'))
+            .toList();
+
+        final masajesData = filteredMaterial
+            .where((item) => item.toLowerCase().contains('masaje'))
+            .toList();
+
+        final clasesData = filteredMaterial
+            .where((item) => item.toLowerCase().contains('introducción') || item.toLowerCase().contains('intro'))
+            .toList();
+
+        setState(() {
+          nivelUsuario = nivel;
+          rutinas = rutinasData;
+          masajes = masajesData;
+          clases = clasesData;
+          cargando = false;
+        });
+
+        print('🔹 Nivel usuario: $nivelUsuario');
+        print('🔹 Material Rutinas: $rutinas');
+        print('🔹 Material Masajes: $masajes');
+        print('🔹 Material Clases: $clases');
+      } else {
+        final data = jsonDecode(response.body);
+        setState(() {
+          error = data['error'] ?? data['message'] ?? "Error al cargar material.";
+          cargando = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        error = "Error al conectar con el servidor: $e";
+        cargando = false;
+      });
+    }
   }
+
+  void abrirModal(String tipo) => setState(() => modalAbierto = tipo);
+  void cerrarModal() => setState(() => modalAbierto = null);
+
+  bool get puedeVerRutinas => rutinas.isNotEmpty;
+  bool get puedeVerMasajes => masajes.isNotEmpty;
+  bool get puedeVerClases => clases.isNotEmpty;
 
   @override
   Widget build(BuildContext context) {
+    if (cargando) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Hero / Portada
+            // 🌄 Portada
             Stack(
               children: [
                 Image.asset(
@@ -92,73 +179,45 @@ class _SuscriptoresYFScreenState extends State<SuscriptoresYFScreen> {
 
             const SizedBox(height: 24),
 
-            // Solo mostrar botones si no hay modal abierto
+            if (error != null)
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(error!, style: const TextStyle(color: Colors.red)),
+              ),
+
             if (modalAbierto == null)
               Wrap(
                 spacing: 12,
                 runSpacing: 12,
                 alignment: WrapAlignment.center,
                 children: [
-                  ElevatedButton(
-                    onPressed: () => abrirModal('rutinas'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: modalAbierto == 'rutinas'
-                          ? Colors.deepPurpleAccent
-                          : Colors.deepPurple[100],
+                  if (puedeVerRutinas)
+                    ElevatedButton(
+                      onPressed: () => abrirModal('rutinas'),
+                      style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple[100]),
+                      child: const Text('Rutinas de Yoga Facial'),
                     ),
-                    child: const Text('Rutinas de Yoga Facial'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () => abrirModal('masajes'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: modalAbierto == 'masajes'
-                          ? Colors.deepPurpleAccent
-                          : Colors.deepPurple[100],
+                  if (puedeVerMasajes)
+                    ElevatedButton(
+                      onPressed: () => abrirModal('masajes'),
+                      style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple[100]),
+                      child: const Text('Masajes previos a tu rutina'),
                     ),
-                    child: const Text('Masajes previos a tu rutina'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () => abrirModal('clases'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: modalAbierto == 'clases'
-                          ? Colors.deepPurpleAccent
-                          : Colors.deepPurple[100],
+                  if (puedeVerClases)
+                    ElevatedButton(
+                      onPressed: () => abrirModal('clases'),
+                      style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple[100]),
+                      child: const Text('Clases extra'),
                     ),
-                    child: const Text('Clases extra'),
-                  ),
                 ],
               ),
 
-            const SizedBox(height: 16),
-
-            // Secciones tipo modal
             if (modalAbierto == 'rutinas')
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: RutinasScreen(
-                  material: widget.materialRutinas,
-                  nivelUsuario: widget.nivelUsuario,
-                  onClose: cerrarModal,
-                ),
-              ),
+              RutinasScreen(material: rutinas, nivelUsuario: nivelUsuario, onClose: cerrarModal),
             if (modalAbierto == 'masajes')
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: MasajesScreen(
-                  material: widget.materialMasajes,
-                  nivelUsuario: widget.nivelUsuario,
-                  onClose: cerrarModal,
-                ),
-              ),
+              MasajesScreen(material: masajes, nivelUsuario: nivelUsuario, onClose: cerrarModal),
             if (modalAbierto == 'clases')
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: ClasesExtraScreen(
-                  material: widget.materialClases,
-                  nivelUsuario: widget.nivelUsuario,
-                  onClose: cerrarModal,
-                ),
-              ),
+              ClasesExtraScreen(material: clases, nivelUsuario: nivelUsuario, onClose: cerrarModal),
           ],
         ),
       ),

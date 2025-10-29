@@ -2,121 +2,142 @@ import 'package:flutter/material.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class NivelIntermedio extends StatefulWidget {
-  final List<Map<String, dynamic>> material;
+  final List<dynamic> material;
   final int nivelUsuario;
+  final VoidCallback onClose;
 
-  const NivelIntermedio({super.key, required this.material, this.nivelUsuario = 4});
+  const NivelIntermedio({
+    super.key,
+    required this.material,
+    required this.nivelUsuario,
+    required this.onClose,
+  });
 
   @override
   State<NivelIntermedio> createState() => _NivelIntermedioState();
 }
 
 class _NivelIntermedioState extends State<NivelIntermedio> {
-  bool menuOpen = false;
-  Map<String, dynamic>? intermedioSeleccionado;
-  YoutubePlayerController? _youtubeController;
+  int? _seleccionIndex;
+  Map<String, dynamic>? _seleccionado;
 
-  void toggleMenu() {
+  final List<Map<String, dynamic>> base = [
+    {'categoria': 3, 'tipo': 'video', 'title': 'Posición Cerrada', 'video': 'u2OEmNMYTCw'},
+    {'categoria': 3, 'tipo': 'video', 'title': 'Desplazamientos', 'video': 'K4bLW4_-w9Q'},
+    {'categoria': 3, 'tipo': 'video', 'title': 'Sácala y peinate', 'video': 'gYRVZobHOeE'},
+    {'categoria': 3, 'tipo': 'video', 'title': 'Rodeo', 'video': 'gYRVZobHOeE'},
+    {'categoria': 3, 'tipo': 'video', 'title': 'Pasea y Pasea con sácala', 'video': 'gYRVZobHOeE'},
+    {'categoria': 3, 'tipo': 'video', 'title': 'Dile que no', 'video': 'gYRVZobHOeE'},
+  ];
+
+  List<Map<String, dynamic>> get filtrado =>
+      base.where((m) => (m['categoria'] ?? 0) <= widget.nivelUsuario).toList();
+
+  void abrirRutina(Map<String, dynamic> rutina) {
     setState(() {
-      menuOpen = !menuOpen;
-      intermedioSeleccionado = null;
-      _youtubeController = null; // limpiar al cerrar menú
+      _seleccionado = rutina;
+      _seleccionIndex = 0;
     });
   }
 
-  void abrirModal(Map<String, dynamic> rutina) {
-    final videoId = YoutubePlayer.convertUrlToId(rutina['video'] ?? '');
-    if (rutina['tipo'] == 'video' && videoId != null) {
-      _youtubeController = YoutubePlayerController(
-        initialVideoId: videoId,
-        flags: const YoutubePlayerFlags(autoPlay: false),
-      );
-    } else {
-      _youtubeController = null;
-    }
-
+  void cerrarRutina() {
     setState(() {
-      intermedioSeleccionado = rutina;
+      _seleccionado = null;
+      _seleccionIndex = null;
     });
+  }
 
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        contentPadding: EdgeInsets.zero,
-        content: SizedBox(
-          width: double.maxFinite,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Align(
-                alignment: Alignment.topRight,
-                child: IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: () {
-                    _youtubeController?.pause();
-                    Navigator.pop(context);
-                    _youtubeController = null;
-                  },
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Text(
-                  rutina['title'] ?? '',
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-              const SizedBox(height: 10),
-              if (_youtubeController != null)
-                YoutubePlayer(controller: _youtubeController!),
-              if (_youtubeController == null && rutina['tipo'] == 'video')
-                const Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Text(
-                    "Video no disponible",
-                    style: TextStyle(color: Colors.red),
-                  ),
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
+  void cambiarPDF(int dir) {
+    if (_seleccionado?['pdf'] == null) return;
+    final total = (_seleccionado!['pdf'] as List).length;
+    setState(() {
+      _seleccionIndex = (_seleccionIndex! + dir + total) % total;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final rutinasFiltradas = widget.material
-        .where((item) => (item['categoria'] ?? 0) <= widget.nivelUsuario)
-        .toList();
-
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Column(
-        children: [
-          ElevatedButton(
-            onPressed: toggleMenu,
-            child: Text(menuOpen ? 'Cerrar clases' : 'Nivel Intermedio'),
+    return Column(
+      children: [
+        ElevatedButton(onPressed: widget.onClose, child: const Text('Cerrar Nivel Intermedio')),
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: filtrado.length,
+          padding: const EdgeInsets.all(8),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            mainAxisSpacing: 8,
+            crossAxisSpacing: 8,
+            childAspectRatio: 1.1,
           ),
-          if (menuOpen)
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: rutinasFiltradas.map((rutina) {
-                return ElevatedButton(
-                  onPressed: () => abrirModal(rutina),
-                  child: Column(
-                    children: [
-                      Text(rutina['title'] ?? ''),
-                      Text(rutina['tipo'] == 'pdf' ? 'PDF' : 'Video'),
-                    ],
-                  ),
-                );
-              }).toList(),
+          itemBuilder: (context, index) {
+            final rutina = filtrado[index];
+            return ElevatedButton(
+              onPressed: () => abrirRutina(rutina),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(rutina['title']),
+                  Text(rutina['tipo'] == 'pdf' ? 'PDF' : 'Video'),
+                ],
+              ),
+            );
+          },
+        ),
+        if (_seleccionado != null)
+          Center(
+            child: Dialog(
+              insetPadding: const EdgeInsets.all(16),
+              child: SizedBox(
+                width: double.infinity,
+                height: 400,
+                child: Stack(
+                  children: [
+                    if (_seleccionado!['tipo'] == 'pdf')
+                      Center(
+                        child: Image.asset(
+                          'assets/images/${_seleccionado!['pdf'][_seleccionIndex!]}',
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                    if (_seleccionado!['tipo'] == 'video')
+                      YoutubePlayer(
+                        controller: YoutubePlayerController(
+                          initialVideoId: _seleccionado!['video'],
+                          flags: const YoutubePlayerFlags(autoPlay: false),
+                        ),
+                        showVideoProgressIndicator: true,
+                      ),
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: IconButton(icon: const Icon(Icons.close), onPressed: cerrarRutina),
+                    ),
+                    if (_seleccionado!['tipo'] == 'pdf' && (_seleccionado!['pdf'] as List).length > 1)
+                      Positioned(
+                        left: 8,
+                        top: 180,
+                        child: IconButton(
+                          icon: const Icon(Icons.chevron_left, size: 32),
+                          onPressed: () => cambiarPDF(-1),
+                        ),
+                      ),
+                    if (_seleccionado!['tipo'] == 'pdf' && (_seleccionado!['pdf'] as List).length > 1)
+                      Positioned(
+                        right: 8,
+                        top: 180,
+                        child: IconButton(
+                          icon: const Icon(Icons.chevron_right, size: 32),
+                          onPressed: () => cambiarPDF(1),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
             ),
-        ],
-      ),
+          ),
+      ],
     );
   }
 }
