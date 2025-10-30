@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'modales_yoga.dart'; // RutinasScreen, MasajesScreen, ClasesExtraScreen
+import 'modales_yoga.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:app_losdealla/data/material_base.dart';
 
 class SuscriptoresYFScreen extends StatefulWidget {
   const SuscriptoresYFScreen({super.key});
@@ -13,11 +14,7 @@ class SuscriptoresYFScreen extends StatefulWidget {
 
 class _SuscriptoresYFScreenState extends State<SuscriptoresYFScreen> {
   final storage = const FlutterSecureStorage();
-
   int nivelUsuario = 0;
-  List<String> rutinas = [];
-  List<String> masajes = [];
-  List<String> clases = [];
   String? modalAbierto;
   String? error;
   bool cargando = true;
@@ -35,8 +32,6 @@ class _SuscriptoresYFScreenState extends State<SuscriptoresYFScreen> {
     });
 
     final token = (await storage.read(key: 'token'))?.trim() ?? '';
-    print('🔹 Token leido en SuscriptoresYFScreen: $token');
-
     if (token.isEmpty) {
       setState(() {
         error = "No estás autorizado. Por favor inicia sesión.";
@@ -54,41 +49,11 @@ class _SuscriptoresYFScreenState extends State<SuscriptoresYFScreen> {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        print('🔹 Datos recibidos del backend: $data');
-
         final nivel = data['nivel'] ?? 0;
-        final material = (data['material'] ?? []) as List;
-
-        // Filtrar y separar material según palabras clave
-        final filteredMaterial = material
-            .map((e) => e.toString().trim())
-            .where((e) => e.isNotEmpty)
-            .toList();
-
-        final rutinasData = filteredMaterial
-            .where((item) => item.toLowerCase().contains('clase'))
-            .toList();
-
-        final masajesData = filteredMaterial
-            .where((item) => item.toLowerCase().contains('masaje'))
-            .toList();
-
-        final clasesData = filteredMaterial
-            .where((item) => item.toLowerCase().contains('introducción') || item.toLowerCase().contains('intro'))
-            .toList();
-
         setState(() {
           nivelUsuario = nivel;
-          rutinas = rutinasData;
-          masajes = masajesData;
-          clases = clasesData;
           cargando = false;
         });
-
-        print('🔹 Nivel usuario: $nivelUsuario');
-        print('🔹 Material Rutinas: $rutinas');
-        print('🔹 Material Masajes: $masajes');
-        print('🔹 Material Clases: $clases');
       } else {
         final data = jsonDecode(response.body);
         setState(() {
@@ -107,35 +72,70 @@ class _SuscriptoresYFScreenState extends State<SuscriptoresYFScreen> {
   void abrirModal(String tipo) => setState(() => modalAbierto = tipo);
   void cerrarModal() => setState(() => modalAbierto = null);
 
-  bool get puedeVerRutinas => rutinas.isNotEmpty;
-  bool get puedeVerMasajes => masajes.isNotEmpty;
-  bool get puedeVerClases => clases.isNotEmpty;
-
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+
     if (cargando) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
       );
     }
 
+    final rutinasPermitidas = rutinasBase
+        .where((item) => item['categoria'] <= nivelUsuario)
+        .map((e) => e['title'].toString())
+        .toList();
+    final masajesPermitidos = masajesBase
+        .where((item) => item['categoria'] <= nivelUsuario)
+        .map((e) => e['title'].toString())
+        .toList();
+    final clasesPermitidas = clasesBase
+        .where((item) => item['categoria'] <= nivelUsuario)
+        .map((e) => e['title'].toString())
+        .toList();
+
+    final secciones = [
+      if (rutinasPermitidas.isNotEmpty)
+        {
+          'titulo': 'Rutinas de Yoga Facial',
+          'tipo': 'rutinas',
+          'imagen': 'assets/images/rutinas.jpg',
+          'alignment': Alignment (0,-0.4),
+        },
+      if (masajesPermitidos.isNotEmpty)
+        {
+          'titulo': 'Masajes previos a tu rutina',
+          'tipo': 'masajes',
+          'imagen': 'assets/images/masajes.jpg',
+          'alignment': Alignment (0,-0.4),
+        },
+      if (clasesPermitidas.isNotEmpty)
+        {
+          'titulo': 'Clases extra',
+          'tipo': 'clases',
+          'imagen': 'assets/images/clases.jpg',
+          'alignment': Alignment(0,-0.4),
+        },
+    ];
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // 🌄 Portada
+            // 🌄 Portada principal
             Stack(
               children: [
                 Image.asset(
                   'assets/images/face_yoga_portada.jpg',
                   width: double.infinity,
-                  height: 400,
+                  height: MediaQuery.of(context).size.height * 0.4,
                   fit: BoxFit.cover,
                 ),
                 Container(
                   width: double.infinity,
-                  height: 400,
+                  height: MediaQuery.of(context).size.height * 0.4,
                   color: Colors.black.withOpacity(0.4),
                 ),
                 Positioned.fill(
@@ -145,10 +145,10 @@ class _SuscriptoresYFScreenState extends State<SuscriptoresYFScreen> {
                       Text(
                         'MATERIAL ADICIONAL',
                         style: TextStyle(
-                          color: Colors.deepPurpleAccent,
-                          fontSize: 32,
+                          color: Colors.white,
+                          fontSize: 30,
                           fontWeight: FontWeight.bold,
-                          shadows: [Shadow(blurRadius: 4, color: Colors.black45, offset: Offset(2,2))],
+                          letterSpacing: 1.5,
                         ),
                       ),
                       SizedBox(height: 8),
@@ -156,9 +156,8 @@ class _SuscriptoresYFScreenState extends State<SuscriptoresYFScreen> {
                         'Yoga Facial',
                         style: TextStyle(
                           color: Colors.pinkAccent,
-                          fontSize: 24,
+                          fontSize: 22,
                           fontWeight: FontWeight.w600,
-                          shadows: [Shadow(blurRadius: 4, color: Colors.black45, offset: Offset(2,2))],
                         ),
                       ),
                     ],
@@ -167,17 +166,16 @@ class _SuscriptoresYFScreenState extends State<SuscriptoresYFScreen> {
               ],
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Text(
-                '¡Hola, nos da mucho gusto que estés aquí! Este espacio ha sido creado para que continúes con tus sesiones de Yoga Facial.',
+                '¡Hola! Este espacio ha sido creado para que continúes con tus sesiones de Yoga Facial y profundices tu práctica.',
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 16, color: Colors.deepPurple[400]),
               ),
             ),
-
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
 
             if (error != null)
               Padding(
@@ -185,39 +183,82 @@ class _SuscriptoresYFScreenState extends State<SuscriptoresYFScreen> {
                 child: Text(error!, style: const TextStyle(color: Colors.red)),
               ),
 
+            // 🌸 Tarjetas visuales
             if (modalAbierto == null)
-              Wrap(
-                spacing: 12,
-                runSpacing: 12,
-                alignment: WrapAlignment.center,
-                children: [
-                  if (puedeVerRutinas)
-                    ElevatedButton(
-                      onPressed: () => abrirModal('rutinas'),
-                      style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple[100]),
-                      child: const Text('Rutinas de Yoga Facial'),
-                    ),
-                  if (puedeVerMasajes)
-                    ElevatedButton(
-                      onPressed: () => abrirModal('masajes'),
-                      style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple[100]),
-                      child: const Text('Masajes previos a tu rutina'),
-                    ),
-                  if (puedeVerClases)
-                    ElevatedButton(
-                      onPressed: () => abrirModal('clases'),
-                      style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple[100]),
-                      child: const Text('Clases extra'),
-                    ),
-                ],
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: secciones.map((sec) {
+                    final titulo = sec['titulo'] as String;
+                    final tipo = sec['tipo'] as String;
+                    final imagen = sec['imagen'] as String;
+                    final alignment = sec['alignment'] as Alignment;
+
+                    return AnimatedScale(
+                      scale: 1,
+                      duration: const Duration(milliseconds: 200),
+                      child: GestureDetector(
+                        onTapUp: (_) => abrirModal(tipo),
+                        child: Container(
+                          margin: const EdgeInsets.only(bottom: 16),
+                          width: width * 0.9,
+                          height: 140,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(22),
+                            image: DecorationImage(
+                              image: AssetImage(imagen),
+                              fit: BoxFit.cover,
+                              alignment: alignment,
+                              colorFilter: ColorFilter.mode(
+                                Colors.black.withOpacity(0.45),
+                                BlendMode.darken,
+                              ),
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black26,
+                                blurRadius: 8,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            titulo,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
               ),
 
+            // 🌿 Modales según tipo
             if (modalAbierto == 'rutinas')
-              RutinasScreen(material: rutinas, nivelUsuario: nivelUsuario, onClose: cerrarModal),
+              RutinasScreen(
+                material: rutinasPermitidas,
+                nivelUsuario: nivelUsuario,
+                onClose: cerrarModal,
+              ),
             if (modalAbierto == 'masajes')
-              MasajesScreen(material: masajes, nivelUsuario: nivelUsuario, onClose: cerrarModal),
+              MasajesScreen(
+                material: masajesPermitidos,
+                nivelUsuario: nivelUsuario,
+                onClose: cerrarModal,
+              ),
             if (modalAbierto == 'clases')
-              ClasesExtraScreen(material: clases, nivelUsuario: nivelUsuario, onClose: cerrarModal),
+              ClasesExtraScreen(
+                material: clasesPermitidas,
+                nivelUsuario: nivelUsuario,
+                onClose: cerrarModal,
+              ),
           ],
         ),
       ),

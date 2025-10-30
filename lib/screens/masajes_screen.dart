@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+import 'package:app_losdealla/data/material_base.dart';
 
 class MasajesScreen extends StatefulWidget {
   final List<dynamic> material;
@@ -18,52 +19,148 @@ class MasajesScreen extends StatefulWidget {
 }
 
 class _MasajesScreenState extends State<MasajesScreen> {
-  int? _imagenIndex;
-  Map<String, dynamic>? _masajeSeleccionado;
-
-  final List<Map<String, dynamic>> masajesBase = [
-    {'categoria': 2, 'tipo': 'video', 'title': 'Masaje periférico', 'video': 'SJ20LZe3RxI'},
-    {'categoria': 3, 'tipo': 'video', 'title': 'Masaje de reseteo facial', 'video': 'sG2qqWv9T9Y'},
-    {'categoria': 4, 'tipo': 'video', 'title': 'Masaje de preparación facial', 'video': 'OUBvlbA8_Fk'},
-    {'categoria': 9, 'tipo': 'video', 'title': 'Masaje con guasha', 'video': 'jPAeiOlCrv0'},
-    {'categoria': 13, 'tipo': 'video', 'title': 'Masaje relajante', 'video': 'ke_h99NelDM'},
-    {'categoria': 19, 'tipo': 'pdf', 'title': 'Masaje de acupresión', 'pdf': ['acupresion_avanzados.png']},
-  ];
-
   List<Map<String, dynamic>> get masajesFiltrados => masajesBase
       .where((m) => (m['categoria'] ?? 0) <= widget.nivelUsuario)
       .toList();
 
   void abrirMasaje(Map<String, dynamic> masaje) {
-    setState(() {
-      _masajeSeleccionado = masaje;
-      _imagenIndex = 0;
-    });
-  }
+    int imagenIndex = 0; // Estado local al modal
 
-  void cerrarMasaje() {
-    setState(() {
-      _masajeSeleccionado = null;
-      _imagenIndex = null;
-    });
-  }
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: "Cerrar",
+      transitionDuration: const Duration(milliseconds: 300),
+      pageBuilder: (context, anim1, anim2) {
+        return Material(
+          color: Colors.black.withOpacity(0.5),
+          child: Center(
+            child: StatefulBuilder(
+              builder: (context, setModalState) {
+                return Container(
+                  width: MediaQuery.of(context).size.width * 0.9,
+                  height: MediaQuery.of(context).size.height * 0.7,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: masaje['tipo'] == 'pdf'
+                        ? Colors.deepPurple[50]
+                        : Colors.pink[50],
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black26,
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Stack(
+                    children: [
+                      // PDF
+                      if (masaje['tipo'] == 'pdf')
+                        Center(
+                          child: Image.asset(
+                            'assets/imgsuscriptores/${masaje['pdf'][imagenIndex]}',
+                            fit: BoxFit.contain,
+                            width: double.infinity,
+                            height: double.infinity,
+                          ),
+                        ),
+                      // Video
+                      if (masaje['tipo'] == 'video')
+                        YoutubePlayer(
+                          controller: YoutubePlayerController(
+                            initialVideoId: masaje['video'],
+                            flags: const YoutubePlayerFlags(autoPlay: false),
+                          ),
+                          showVideoProgressIndicator: true,
+                        ),
 
-  void cambiarImagen(int dir) {
-    if (_masajeSeleccionado?['pdf'] == null) return;
-    final total = (_masajeSeleccionado!['pdf'] as List).length;
-    setState(() {
-      _imagenIndex = (_imagenIndex! + dir + total) % total;
-    });
+                      // Botón cerrar
+                      Positioned(
+                        top: 0,
+                        right: 0,
+                        child: IconButton(
+                          icon: const Icon(Icons.close, size: 28),
+                          color: Colors.black87,
+                          onPressed: () => Navigator.of(context).pop(),
+                        ),
+                      ),
+
+                      // Navegación PDF
+                      if (masaje['tipo'] == 'pdf' &&
+                          (masaje['pdf'] as List).length > 1)
+                        Positioned(
+                          left: 0,
+                          top: 0,
+                          bottom: 0,
+                          child: Center(
+                            child: IconButton(
+                              icon: const Icon(Icons.chevron_left, size: 36),
+                              color: Colors.black87,
+                              onPressed: () {
+                                setModalState(() {
+                                  imagenIndex = (imagenIndex - 1 +
+                                      (masaje['pdf'] as List).length) %
+                                      (masaje['pdf'] as List).length;
+                                });
+                              },
+                            ),
+                          ),
+                        ),
+                      if (masaje['tipo'] == 'pdf' &&
+                          (masaje['pdf'] as List).length > 1)
+                        Positioned(
+                          right: 0,
+                          top: 0,
+                          bottom: 0,
+                          child: Center(
+                            child: IconButton(
+                              icon: const Icon(Icons.chevron_right, size: 36),
+                              color: Colors.black87,
+                              onPressed: () {
+                                setModalState(() {
+                                  imagenIndex =
+                                      (imagenIndex + 1) % (masaje['pdf'] as List).length;
+                                });
+                              },
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        );
+      },
+      transitionBuilder: (context, anim1, anim2, child) {
+        return FadeTransition(
+          opacity: CurvedAnimation(parent: anim1, curve: Curves.easeOut),
+          child: ScaleTransition(
+            scale: CurvedAnimation(parent: anim1, curve: Curves.easeOutBack),
+            child: child,
+          ),
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
     return Column(
       children: [
         ElevatedButton(
           onPressed: widget.onClose,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.deepPurpleAccent,
+            foregroundColor: Colors.white, // Texto blanco
+          ),
           child: const Text('Cerrar masajes'),
         ),
+        const SizedBox(height: 12),
         GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -76,75 +173,52 @@ class _MasajesScreenState extends State<MasajesScreen> {
           ),
           itemBuilder: (context, index) {
             final masaje = masajesFiltrados[index];
-            return ElevatedButton(
-              onPressed: () => abrirMasaje(masaje),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(masaje['title']),
-                  Text(masaje['tipo'] == 'pdf' ? 'PDF' : 'Video'),
-                ],
+            return GestureDetector(
+              onTap: () => abrirMasaje(masaje),
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  image: DecorationImage(
+                    image: AssetImage(
+                      masaje['tipo'] == 'pdf'
+                          ? 'assets/images/pdf_thumb.jpg'
+                          : 'assets/images/video_thumb.jpg',
+                    ),
+                    fit: BoxFit.cover,
+                    colorFilter: ColorFilter.mode(
+                      Colors.black.withOpacity(0.3),
+                      BlendMode.darken,
+                    ),
+                  ),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 6,
+                      offset: Offset(0, 3),
+                    ),
+                  ],
+                ),
+                alignment: Alignment.center,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      masaje['title'],
+                      style: const TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      masaje['tipo'] == 'pdf' ? 'PDF' : 'Video',
+                      style: const TextStyle(color: Colors.white70),
+                    ),
+                  ],
+                ),
               ),
             );
           },
         ),
-        if (_masajeSeleccionado != null)
-          Center(
-            child: Dialog(
-              insetPadding: const EdgeInsets.all(16),
-              child: SizedBox(
-                width: double.infinity,
-                height: 400,
-                child: Stack(
-                  children: [
-                    if (_masajeSeleccionado!['tipo'] == 'pdf')
-                      Center(
-                        child: Image.asset(
-                          'assets/images/${_masajeSeleccionado!['pdf'][_imagenIndex!]}',
-                          fit: BoxFit.contain,
-                        ),
-                      ),
-                    if (_masajeSeleccionado!['tipo'] == 'video')
-                      YoutubePlayer(
-                        controller: YoutubePlayerController(
-                          initialVideoId: _masajeSeleccionado!['video'],
-                          flags: const YoutubePlayerFlags(autoPlay: false),
-                        ),
-                        showVideoProgressIndicator: true,
-                      ),
-                    Positioned(
-                      top: 8,
-                      right: 8,
-                      child: IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: cerrarMasaje,
-                      ),
-                    ),
-                    if (_masajeSeleccionado!['tipo'] == 'pdf' &&
-                        (_masajeSeleccionado!['pdf'] as List).length > 1)
-                      Positioned(
-                        left: 8,
-                        top: 180,
-                        child: IconButton(
-                          icon: const Icon(Icons.chevron_left, size: 32),
-                          onPressed: () => cambiarImagen(-1),
-                        ),
-                      ),
-                    if (_masajeSeleccionado!['tipo'] == 'pdf' &&
-                        (_masajeSeleccionado!['pdf'] as List).length > 1)
-                      Positioned(
-                        right: 8,
-                        top: 180,
-                        child: IconButton(
-                          icon: const Icon(Icons.chevron_right, size: 32),
-                          onPressed: () => cambiarImagen(1),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            ),
-          ),
       ],
     );
   }
