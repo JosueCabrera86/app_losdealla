@@ -22,15 +22,15 @@ class _RutinasScreenState extends State<RutinasScreen> {
   Map<String, dynamic>? _rutinaSeleccionada;
 
   final List<Map<String, dynamic>> rutinasBase = [
-    {'categoria': 5, 'tipo': 'pdf', 'title': '1. Frente y ojos', 'pdf': ['Frente-y-ojos-1.png']},
+    {'categoria': 5, 'tipo': 'pdf', 'title': '1. Frente y ojos', 'pdf': ['frente_y_ojos_1.png,']},
     {'categoria': 6, 'tipo': 'video', 'title': '1. Frente y ojos', 'video': 'xW4U1i4XxJg'},
-    {'categoria': 7, 'tipo': 'pdf', 'title': '2. Una rutina para ojos', 'pdf': ['Ojos-1.png']},
+    {'categoria': 7, 'tipo': 'pdf', 'title': '2. Una rutina para ojos', 'pdf': ['ojos_1.png']},
     {'categoria': 8, 'tipo': 'video', 'title': '2. Una rutina para ojos', 'video': '6tkfc-pobr0'},
-    {'categoria': 9, 'tipo': 'pdf', 'title': '3. Línea facial y cuello', 'pdf': ['Linea-Facial-y-Cuello-1.png']},
+    {'categoria': 9, 'tipo': 'pdf', 'title': '3. Línea facial y cuello', 'pdf': ['linea_facial_y_cuello_1.png']},
     {'categoria': 10, 'tipo': 'video', 'title': '3. Línea facial y cuello', 'video': 'Q6pmDrXMROs'},
-    {'categoria': 14, 'tipo': 'pdf', 'title': '4. Nariz, labios y nasolabiales', 'pdf': ['Nariz-Labios-y-Nasolabiales-1.png','Nariz-Labios-y-Nasolabiales-2.png','Nariz-Labios-y-Nasolabiales-3.png','Frente-y-ojos-4.png']},
+    {'categoria': 14, 'tipo': 'pdf', 'title': '4. Nariz, labios y nasolabiales', 'pdf': ['nariz-labios_y_nasolabiales_1.png','nariz_labios_y_nasolabiales_2.png','nariz_labios_y_nasolabiales_3.png','frente_y_ojos-4.png']},
     {'categoria': 15, 'tipo': 'video', 'title': '4. Nariz, labios y nasolabiales', 'video': 'v0nMSc7bDEI'},
-    {'categoria': 17, 'tipo': 'pdf', 'title': '5. Pómulos y sonrisa', 'pdf': ['Pomulos-y-Sonrisa-1.png','Pomulos-y-Sonrisa-2.png','Pomulos-y-Sonrisa-3.png','Frente-y-ojos-4.png']},
+    {'categoria': 17, 'tipo': 'pdf', 'title': '5. Pómulos y sonrisa', 'pdf': ['pomulos_y_sonrisa_1.png','pomulos_y_sonrisa_2.png','pomulos_y_sonrisa_3.png','frente_y_ojos_4.png']},
     {'categoria': 18, 'tipo': 'video', 'title': '5. Pómulos y sonrisa', 'video': 'uPnft5T1_Ps'},
     {'categoria': 20, 'tipo': 'video', 'title': '6. Acupresión avanzada', 'video': 'BoCZ0nkv58M'},
   ];

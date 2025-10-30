@@ -22,7 +22,7 @@ class _ClasesExtraScreenState extends State<ClasesExtraScreen> {
   Map<String, dynamic>? _claseSeleccionada;
 
   final List<Map<String, dynamic>> clasesBase = [
-    {'categoria': 1, 'tipo': 'pdf', 'title': 'Clase introductoria', 'pdf': ['portadainfo.png','info9.png','info10.png','info11.png','info12.png','Frente-y-ojos-4.png']},
+    {'categoria': 1, 'tipo': 'pdf', 'title': 'Clase introductoria', 'pdf': ['portadainfo.png','info9.png','info10.png','info11.png','info12.png','frente_y_ojos-4.png']},
     {'categoria': 1, 'tipo': 'video', 'title': 'Clase introductoria', 'video': 'u2OEmNMYTCw'},
     {'categoria': 4, 'tipo': 'video', 'title': 'Clase 1', 'video': 'K4bLW4_-w9Q'},
     {'categoria': 10, 'tipo': 'video', 'title': 'Clase 2', 'video': 'gYRVZobHOeE'},

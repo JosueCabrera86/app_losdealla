@@ -27,7 +27,7 @@ class _MasajesScreenState extends State<MasajesScreen> {
     {'categoria': 4, 'tipo': 'video', 'title': 'Masaje de preparación facial', 'video': 'OUBvlbA8_Fk'},
     {'categoria': 9, 'tipo': 'video', 'title': 'Masaje con guasha', 'video': 'jPAeiOlCrv0'},
     {'categoria': 13, 'tipo': 'video', 'title': 'Masaje relajante', 'video': 'ke_h99NelDM'},
-    {'categoria': 19, 'tipo': 'pdf', 'title': 'Masaje de acupresión', 'pdf': ['Acupresion-avanzados.png']},
+    {'categoria': 19, 'tipo': 'pdf', 'title': 'Masaje de acupresión', 'pdf': ['acupresion_avanzados.png']},
   ];
 
   List<Map<String, dynamic>> get masajesFiltrados => masajesBase
