@@ -74,7 +74,12 @@ class _SuscriptoresYFScreenState extends State<SuscriptoresYFScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final size = MediaQuery.of(context).size;
+    final width = size.width;
+    final isLandscape = size.width > size.height;
+
+    // 🔹 Altura de la portada según orientación
+    final portadaHeight = isLandscape ? size.height * 0.6 : size.height * 0.4;
 
     if (cargando) {
       return const Scaffold(
@@ -101,21 +106,21 @@ class _SuscriptoresYFScreenState extends State<SuscriptoresYFScreen> {
           'titulo': 'Rutinas de Yoga Facial',
           'tipo': 'rutinas',
           'imagen': 'assets/images/rutinas.jpg',
-          'alignment': Alignment (0,-0.4),
+          'alignment': const Alignment(0, -0.5),
         },
       if (masajesPermitidos.isNotEmpty)
         {
           'titulo': 'Masajes previos a tu rutina',
           'tipo': 'masajes',
           'imagen': 'assets/images/masajes.jpg',
-          'alignment': Alignment (0,-0.4),
+          'alignment': const Alignment(0, -0.5),
         },
       if (clasesPermitidas.isNotEmpty)
         {
           'titulo': 'Clases extra',
           'tipo': 'clases',
           'imagen': 'assets/images/clases.jpg',
-          'alignment': Alignment(0,-0.4),
+          'alignment': const Alignment(0, -0.4),
         },
     ];
 
@@ -130,12 +135,13 @@ class _SuscriptoresYFScreenState extends State<SuscriptoresYFScreen> {
                 Image.asset(
                   'assets/images/face_yoga_portada.jpg',
                   width: double.infinity,
-                  height: MediaQuery.of(context).size.height * 0.4,
+                  height: portadaHeight,
                   fit: BoxFit.cover,
+                  alignment: Alignment(0, -0.7), // ajustar inicio de la imagen
                 ),
                 Container(
                   width: double.infinity,
-                  height: MediaQuery.of(context).size.height * 0.4,
+                  height: portadaHeight,
                   color: Colors.black.withOpacity(0.4),
                 ),
                 Positioned.fill(
@@ -194,6 +200,10 @@ class _SuscriptoresYFScreenState extends State<SuscriptoresYFScreen> {
                     final imagen = sec['imagen'] as String;
                     final alignment = sec['alignment'] as Alignment;
 
+                    // 🔹 Ajuste ancho y alto según orientación
+                    final cardWidth = isLandscape ? width * 0.7 : width * 0.9;
+                    final cardHeight = isLandscape ? 180.0 : 140.0;
+
                     return AnimatedScale(
                       scale: 1,
                       duration: const Duration(milliseconds: 200),
@@ -201,8 +211,8 @@ class _SuscriptoresYFScreenState extends State<SuscriptoresYFScreen> {
                         onTapUp: (_) => abrirModal(tipo),
                         child: Container(
                           margin: const EdgeInsets.only(bottom: 16),
-                          width: width * 0.9,
-                          height: 140,
+                          width: cardWidth,
+                          height: cardHeight,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(22),
                             image: DecorationImage(

@@ -15,7 +15,6 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   void initState() {
     super.initState();
-    // Pequeño retardo para la animación inicial
     Future.delayed(const Duration(milliseconds: 300), () {
       setState(() {
         _showContent = true;
@@ -25,138 +24,158 @@ class _HomeScreenState extends State<HomeScreen>
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final isLandscape = size.width > size.height;
+    final imageSize = isLandscape ? size.width * 0.25 : size.width * 0.35;
+    final padding = isLandscape ? 32.0 : 24.0;
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Material Adicional'),
-        backgroundColor: colorPurple,
+        centerTitle: true,
+        title: const Text(
+          'Material Adicional',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+            fontSize: 20,
+          ),
+        ),
+        backgroundColor: const Color(0xFF4B0082),
+        elevation: 4,
       ),
       body: Center(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
+          padding: EdgeInsets.all(padding),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // 🟢 Mensaje de bienvenida
-              const Text(
+              Text(
                 '¡Hola, nos da mucho gusto que estés aquí!',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 22,
+                  fontSize: size.width * 0.05,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF660099),
+                  color: colorPurple,
                 ),
               ),
               const SizedBox(height: 16),
-              const Text(
+              Text(
                 'Te damos la bienvenida a este espacio que ha sido creado para que puedas complementar y dar continuidad a tu práctica.',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16, color: Colors.black87),
+                style: TextStyle(
+                  fontSize: size.width * 0.04,
+                  color: Colors.black87,
+                ),
               ),
-
               const SizedBox(height: 40),
 
-
-              const SizedBox(height: 32),
-
-              // 🟣 Opciones: Yoga Facial / Casino
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // 🧘 Yoga Facial
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      AnimatedOpacity(
-                        opacity: _showContent ? 1 : 0,
-                        duration: const Duration(seconds: 1),
-                        child: AnimatedScale(
-                          scale: _showContent ? 1 : 0.8,
-                          duration: const Duration(seconds: 1),
-                          curve: Curves.easeOutBack,
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(12),
-                            onTap: () {
-
-                              Navigator.pushNamed(context, '/loginYoga');
-
-                            },
-                            splashColor: Colors.purple.withOpacity(0.2),
-                            highlightColor: Colors.purple.withOpacity(0.1),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(12),
-                              child: Image.asset(
-                                'assets/images/yoga_facial.jpg',
-                                width: 150,
-                                height: 150,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          ),
-                        ),
+              // 🔹 Opciones alineadas en horizontal o vertical
+              if (isLandscape)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  crossAxisAlignment: CrossAxisAlignment.start, // 🔸 Clave para alinear arriba
+                  children: [
+                    Expanded(
+                      child: _buildOption(
+                        context,
+                        image: 'assets/images/yoga_facial.jpg',
+                        label: 'Yoga Facial',
+                        width: imageSize,
+                        route: '/loginYoga',
+                        alignBottom: true, // 🔸 Centra visualmente
                       ),
-                      const SizedBox(height: 8),
-                      const Text(
-                        'Yoga Facial',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                          color: Color(0xFF660099),
-                        ),
+                    ),
+                    const SizedBox(width: 30),
+                    Expanded(
+                      child: _buildOption(
+                        context,
+                        image: 'assets/images/casino.jpg',
+                        label: 'Formación de profesores\nCasino (Salsa Cubana)',
+                        width: imageSize,
+                        route: '/loginCasino',
+                        alignBottom: true,
                       ),
-                    ],
-                  ),
-
-                  // 💃 Casino
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      AnimatedOpacity(
-                        opacity: _showContent ? 1 : 0,
-                        duration: const Duration(seconds: 1),
-                        child: AnimatedScale(
-                          scale: _showContent ? 1 : 0.8,
-                          duration: const Duration(seconds: 1),
-                          curve: Curves.easeOutBack,
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(12),
-                            onTap: () {
-                             Navigator.pushNamed(context, '/loginCasino');
-
-                            },
-                            splashColor: Colors.purple.withOpacity(0.2),
-                            highlightColor: Colors.purple.withOpacity(0.1),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(12),
-                              child: Image.asset(
-                                'assets/images/casino.png',
-                                width: 150,
-                                height: 150,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      const Text(
-                        'Formación de profesores\nCasino (Salsa Cubana)',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                          color: Color(0xFF660099),
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+                    ),
+                  ],
+                )
+              else
+                Column(
+                  children: [
+                    _buildOption(
+                      context,
+                      image: 'assets/images/yoga_facial.jpg',
+                      label: 'Yoga Facial',
+                      width: imageSize,
+                      route: '/loginYoga',
+                    ),
+                    const SizedBox(height: 30),
+                    _buildOption(
+                      context,
+                      image: 'assets/images/casino.jpg',
+                      label:
+                      'Formación de profesores\nCasino (Salsa Cubana)',
+                      width: imageSize,
+                      route: '/loginCasino',
+                    ),
+                  ],
+                ),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildOption(
+      BuildContext context, {
+        required String image,
+        required String label,
+        required double width,
+        required String route,
+        bool alignBottom = false,
+      }) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment:
+      alignBottom ? MainAxisAlignment.center : MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        AnimatedOpacity(
+          opacity: _showContent ? 1 : 0,
+          duration: const Duration(seconds: 1),
+          child: AnimatedScale(
+            scale: _showContent ? 1 : 0.8,
+            duration: const Duration(seconds: 1),
+            curve: Curves.easeOutBack,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(12),
+              onTap: () => Navigator.pushNamed(context, route),
+              splashColor: Colors.purple.withOpacity(0.2),
+              highlightColor: Colors.purple.withOpacity(0.1),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.asset(
+                  image,
+                  width: width,
+                  height: width,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          label,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: width * 0.11,
+            color: const Color(0xFF660099),
+          ),
+        ),
+      ],
     );
   }
 }

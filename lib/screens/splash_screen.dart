@@ -67,13 +67,16 @@ class _SplashScreenState extends State<SplashScreen> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Image.asset('assets/images/escudoqroo.png', width: 130),
                   Transform.translate(
-                    offset: const Offset(-19, 0),
-                    child: Image.asset('assets/images/logo_sebien.png', width: 130),
+                      offset: const Offset(-15,0),
+                      child: Image.asset('assets/images/escudoqroo.png', width: 140),
+                  ),
+                  Transform.translate(
+                    offset: const Offset(-30, 0),
+                    child: Image.asset('assets/images/logo_sebien.png', width: 140),
                   ),
                   const SizedBox(width: 8),
-                  Image.asset('assets/images/logo_faro.png', width: 60),
+                  Image.asset('assets/images/logo_faro.png', width: 50),
                 ],
               ),
             ),
