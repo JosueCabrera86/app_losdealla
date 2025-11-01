@@ -56,7 +56,6 @@ class _RutinasScreenState extends State<RutinasScreen> {
                   ),
                   child: Stack(
                     children: [
-                      // PDF
                       if (rutina['tipo'] == 'pdf')
                         Center(
                           child: Image.asset(
@@ -66,7 +65,6 @@ class _RutinasScreenState extends State<RutinasScreen> {
                             height: double.infinity,
                           ),
                         ),
-                      // Video
                       if (rutina['tipo'] == 'video')
                         YoutubePlayer(
                           controller: YoutubePlayerController(
@@ -75,8 +73,6 @@ class _RutinasScreenState extends State<RutinasScreen> {
                           ),
                           showVideoProgressIndicator: true,
                         ),
-
-                      // Botón cerrar
                       Positioned(
                         top: 0,
                         right: 0,
@@ -86,47 +82,45 @@ class _RutinasScreenState extends State<RutinasScreen> {
                           onPressed: () => Navigator.of(context).pop(),
                         ),
                       ),
-
-                      // Navegación PDF
                       if (rutina['tipo'] == 'pdf' &&
                           (rutina['pdf'] as List).length > 1)
-                        Positioned(
-                          left: 0,
-                          top: 0,
-                          bottom: 0,
-                          child: Center(
-                            child: IconButton(
-                              icon: const Icon(Icons.chevron_left, size: 36),
-                              color: Colors.black87,
-                              onPressed: () {
-                                setModalState(() {
-                                  imagenIndex = (imagenIndex - 1 +
-                                      (rutina['pdf'] as List).length) %
-                                      (rutina['pdf'] as List).length;
-                                });
-                              },
+                        ...[
+                          Positioned(
+                            left: 0,
+                            top: 0,
+                            bottom: 0,
+                            child: Center(
+                              child: IconButton(
+                                icon: const Icon(Icons.chevron_left, size: 36),
+                                color: Colors.black87,
+                                onPressed: () {
+                                  setModalState(() {
+                                    imagenIndex = (imagenIndex - 1 +
+                                        (rutina['pdf'] as List).length) %
+                                        (rutina['pdf'] as List).length;
+                                  });
+                                },
+                              ),
                             ),
                           ),
-                        ),
-                      if (rutina['tipo'] == 'pdf' &&
-                          (rutina['pdf'] as List).length > 1)
-                        Positioned(
-                          right: 0,
-                          top: 0,
-                          bottom: 0,
-                          child: Center(
-                            child: IconButton(
-                              icon: const Icon(Icons.chevron_right, size: 36),
-                              color: Colors.black87,
-                              onPressed: () {
-                                setModalState(() {
-                                  imagenIndex =
-                                      (imagenIndex + 1) % (rutina['pdf'] as List).length;
-                                });
-                              },
+                          Positioned(
+                            right: 0,
+                            top: 0,
+                            bottom: 0,
+                            child: Center(
+                              child: IconButton(
+                                icon: const Icon(Icons.chevron_right, size: 36),
+                                color: Colors.black87,
+                                onPressed: () {
+                                  setModalState(() {
+                                    imagenIndex = (imagenIndex + 1) %
+                                        (rutina['pdf'] as List).length;
+                                  });
+                                },
+                              ),
                             ),
                           ),
-                        ),
+                        ],
                     ],
                   ),
                 );
@@ -149,74 +143,112 @@ class _RutinasScreenState extends State<RutinasScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final paddingLateral = 8.0;
+
     return Column(
       children: [
         ElevatedButton(
           onPressed: widget.onClose,
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.blueAccent,
-            foregroundColor: Colors.white, // Texto blanco
+            foregroundColor: Colors.white,
           ),
           child: const Text('Cerrar rutinas'),
         ),
         const SizedBox(height: 12),
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: rutinasFiltradas.length,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            mainAxisSpacing: 8,
-            crossAxisSpacing: 8,
-            childAspectRatio: 1.2,
-          ),
-          itemBuilder: (context, index) {
-            final rutina = rutinasFiltradas[index];
-            return GestureDetector(
-              onTap: () => abrirRutina(rutina),
-              child: Container(
-                decoration: BoxDecoration(
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: paddingLateral),
+          child: GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: rutinasFiltradas.length,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              mainAxisSpacing: 8,
+              crossAxisSpacing: 8,
+              childAspectRatio: 16 / 9,
+            ),
+            itemBuilder: (context, index) {
+              final rutina = rutinasFiltradas[index];
+              final bool esPDF = rutina['tipo'] == 'pdf';
+              final String? videoId =
+              !esPDF ? rutina['video'] : null;
+              final String? thumbnailUrl = videoId != null
+                  ? 'https://img.youtube.com/vi/$videoId/hqdefault.jpg'
+                  : null;
+
+              return GestureDetector(
+                onTap: () => abrirRutina(rutina),
+                child: ClipRRect(
                   borderRadius: BorderRadius.circular(16),
-                  image: DecorationImage(
-                    image: AssetImage(
-                      rutina['tipo'] == 'pdf'
-                          ? 'assets/images/pdf_thumb.jpg'
-                          : 'assets/images/video_thumb.jpg',
-                    ),
-                    fit: BoxFit.cover,
-                    colorFilter: ColorFilter.mode(
-                      Colors.black.withOpacity(0.3),
-                      BlendMode.darken,
-                    ),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      Container(color: Colors.grey[300]),
+
+                      if (esPDF)
+                        Image.asset(
+                          'assets/images/pdf_thumb.jpg',
+                          fit: BoxFit.cover,
+                        )
+                      else
+                        Image.network(
+                          thumbnailUrl!,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              color: Colors.grey[300],
+                              child: const Center(
+                                child: Icon(Icons.error, color: Colors.red, size: 40),
+                              ),
+                            );
+                          },
+                        ),
+
+                      Container(color: Colors.black.withOpacity(0.3)),
+
+                      Align(
+                        alignment: Alignment.center,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            if (!esPDF)
+                              const Icon(
+                                Icons.play_circle_fill,
+                                color: Colors.white,
+                                size: 50,
+                              ),
+                            const SizedBox(height: 6),
+                            Text(
+                              rutina['title'],
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                shadows: [
+                                  Shadow(
+                                    blurRadius: 4,
+                                    color: Colors.black54,
+                                    offset: Offset(1, 1),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            if (esPDF) const SizedBox(height: 4),
+                            if (esPDF)
+                              const Text(
+                                'PDF',
+                                style: TextStyle(color: Colors.white70),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.black26,
-                      blurRadius: 6,
-                      offset: Offset(0, 3),
-                    ),
-                  ],
                 ),
-                alignment: Alignment.center,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      rutina['title'],
-                      style: const TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      rutina['tipo'] == 'pdf' ? 'PDF' : 'Video',
-                      style: const TextStyle(color: Colors.white70),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
       ],
     );

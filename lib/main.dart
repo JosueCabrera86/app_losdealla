@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Mano Entonada',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF660099)),
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFF5F5F5)),
       ),
       initialRoute: '/splash', // pantalla inicial
       routes: {

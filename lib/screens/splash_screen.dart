@@ -57,7 +57,7 @@ class _SplashScreenState extends State<SplashScreen> {
             child: AnimatedOpacity(
               opacity: opacityLogo2,
               duration: const Duration(seconds: 1),
-              child: Image.asset('assets/images/logo_manoentonada.png', width: 200),
+              child: Image.asset('assets/images/logo_manoentonadas.png', width: 200),
             ),
           ),
           Center(
@@ -75,8 +75,9 @@ class _SplashScreenState extends State<SplashScreen> {
                     offset: const Offset(-30, 0),
                     child: Image.asset('assets/images/logo_sebien.png', width: 140),
                   ),
-                  const SizedBox(width: 8),
-                  Image.asset('assets/images/logo_faro.png', width: 50),
+                  const SizedBox(width:2),
+
+                  Image.asset('assets/images/logo_faro.png', width: 70),
                 ],
               ),
             ),

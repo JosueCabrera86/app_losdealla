@@ -57,34 +57,109 @@ class _NivelPrincipianteState extends State<NivelPrincipiante> {
 
   @override
   Widget build(BuildContext context) {
+    final paddingLateral = 8.0;
+
     return Column(
       children: [
-        ElevatedButton(onPressed: widget.onClose, child: const Text('Cerrar Nivel Principiante')),
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: filtrado.length,
-          padding: const EdgeInsets.all(8),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            mainAxisSpacing: 8,
-            crossAxisSpacing: 8,
-            childAspectRatio: 1.1,
-          ),
-          itemBuilder: (context, index) {
-            final rutina = filtrado[index];
-            return ElevatedButton(
-              onPressed: () => abrirRutina(rutina),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(rutina['title']),
-                  Text(rutina['tipo'] == 'pdf' ? 'PDF' : 'Video'),
-                ],
-              ),
-            );
-          },
+        ElevatedButton(
+          onPressed: widget.onClose,
+          child: const Text('Cerrar Nivel Principiante'),
         ),
+        const SizedBox(height: 12),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: paddingLateral),
+          child: GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: filtrado.length,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              mainAxisSpacing: 8,
+              crossAxisSpacing: 8,
+              childAspectRatio: 16 / 9,
+            ),
+            itemBuilder: (context, index) {
+              final rutina = filtrado[index];
+              final bool esPDF = rutina['tipo'] == 'pdf';
+              final String? videoId = !esPDF ? rutina['video'] : null;
+              final String? thumbnailUrl = videoId != null
+                  ? 'https://img.youtube.com/vi/$videoId/hqdefault.jpg'
+                  : null;
+
+              return GestureDetector(
+                onTap: () => abrirRutina(rutina),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      Container(color: Colors.grey[300]),
+
+                      if (esPDF)
+                        Image.asset(
+                          'assets/images/pdf_thumb.jpg',
+                          fit: BoxFit.cover,
+                        )
+                      else
+                        Image.network(
+                          thumbnailUrl!,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              color: Colors.grey[300],
+                              child: const Center(
+                                child: Icon(Icons.error, color: Colors.red, size: 40),
+                              ),
+                            );
+                          },
+                        ),
+
+                      Container(color: Colors.black.withOpacity(0.3)),
+
+                      Align(
+                        alignment: Alignment.center,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            if (!esPDF)
+                              const Icon(
+                                Icons.play_circle_fill,
+                                color: Colors.white,
+                                size: 50,
+                              ),
+                            const SizedBox(height: 6),
+                            Text(
+                              rutina['title'],
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                shadows: [
+                                  Shadow(
+                                    blurRadius: 4,
+                                    color: Colors.black54,
+                                    offset: Offset(1, 1),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            if (esPDF) const SizedBox(height: 4),
+                            if (esPDF)
+                              const Text(
+                                'PDF',
+                                style: TextStyle(color: Colors.white70),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+
         if (_seleccionado != null)
           Center(
             child: Dialog(
@@ -99,6 +174,8 @@ class _NivelPrincipianteState extends State<NivelPrincipiante> {
                         child: Image.asset(
                           'assets/images/${_seleccionado!['pdf'][_seleccionIndex!]}',
                           fit: BoxFit.contain,
+                          width: double.infinity,
+                          height: double.infinity,
                         ),
                       ),
                     if (_seleccionado!['tipo'] == 'video')
@@ -112,9 +189,13 @@ class _NivelPrincipianteState extends State<NivelPrincipiante> {
                     Positioned(
                       top: 8,
                       right: 8,
-                      child: IconButton(icon: const Icon(Icons.close), onPressed: cerrarRutina),
+                      child: IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: cerrarRutina,
+                      ),
                     ),
-                    if (_seleccionado!['tipo'] == 'pdf' && (_seleccionado!['pdf'] as List).length > 1)
+                    if (_seleccionado!['tipo'] == 'pdf' &&
+                        (_seleccionado!['pdf'] as List).length > 1)
                       Positioned(
                         left: 8,
                         top: 180,
@@ -123,7 +204,8 @@ class _NivelPrincipianteState extends State<NivelPrincipiante> {
                           onPressed: () => cambiarPDF(-1),
                         ),
                       ),
-                    if (_seleccionado!['tipo'] == 'pdf' && (_seleccionado!['pdf'] as List).length > 1)
+                    if (_seleccionado!['tipo'] == 'pdf' &&
+                        (_seleccionado!['pdf'] as List).length > 1)
                       Positioned(
                         right: 8,
                         top: 180,
