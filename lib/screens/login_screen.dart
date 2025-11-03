@@ -76,7 +76,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final colorLila = const Color(0xFF660099);
-    final colorAzul = const Color(0xFF330066);
+    final colorAzul = const Color(0xFFF5F5F5);
 
     final size = MediaQuery.of(context).size;
     final isLandscape = size.width > size.height;

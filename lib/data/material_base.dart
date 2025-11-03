@@ -14,11 +14,11 @@ final List<Map<String, dynamic>> rutinasBase = [
 
 final List<Map<String, dynamic>> clasesBase = [
   {'categoria': 1, 'tipo': 'pdf', 'title': 'Clase introductoria', 'pdf': ['portadainfo.png','info9.png','info10.png','info11.png','info12.png','frente_y_ojos_4.png']},
-  {'categoria': 1, 'tipo': 'video', 'title': 'Clase introductoria', 'video': 'u2OEmNMYTCw'},
-  {'categoria': 4, 'tipo': 'video', 'title': 'Clase 1', 'video': 'K4bLW4_-w9Q'},
-  {'categoria': 10, 'tipo': 'video', 'title': 'Clase 2', 'video': 'gYRVZobHOeE'},
-  {'categoria': 16, 'tipo': 'video', 'title': 'Clase 3', 'video': 'iBkVM0zyLRc'},
-  {'categoria': 21, 'tipo': 'video', 'title': 'Clase especial de Kinesiotape', 'video': 'iozMsfyRchA'},
+  {'categoria': 1, 'tipo': 'video', 'title': 'Clase1. Introductoria', 'video': 'u2OEmNMYTCw'},
+  {'categoria': 4, 'tipo': 'video', 'title': 'Clase 2. Masaje y rutina con Sofía', 'video': 'K4bLW4_-w9Q'},
+  {'categoria': 10, 'tipo': 'video', 'title': 'Clase 3. Masaje y rutina con Blanca', 'video': 'gYRVZobHOeE'},
+  {'categoria': 16, 'tipo': 'video', 'title': 'Clase 4. Masaje y rutina con Adriana', 'video': 'iBkVM0zyLRc'},
+  {'categoria': 21, 'tipo': 'video', 'title': 'Clase 5. Clase especial de Kinesiotape', 'video': 'iozMsfyRchA'},
 ];
 final List<Map<String, dynamic>> masajesBase = [
   {'categoria': 2, 'tipo': 'video', 'title': 'Masaje periférico', 'video': 'SJ20LZe3RxI'},

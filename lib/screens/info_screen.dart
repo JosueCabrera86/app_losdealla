@@ -21,7 +21,7 @@ class _InfoScreenState extends State<InfoScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFEDCBF6),
       body: LayoutBuilder(
         builder: (context, constraints) {
           double scale = (constraints.maxWidth / 400).clamp(0.7, 1.2);
@@ -43,7 +43,7 @@ class _InfoScreenState extends State<InfoScreen> {
                         children: [
                           Image.asset('assets/images/logo_losdeallac.png', width: 130),
                           const SizedBox(width: 60),
-                          Image.asset('assets/images/logo_manoentonadas.png', width: 130),
+                          Image.asset('assets/images/logo_manoentonadaa.png', width: 130),
                         ],
                       ),
                       const SizedBox(height: 40),
@@ -90,8 +90,8 @@ class _InfoScreenState extends State<InfoScreen> {
                           Transform.translate(
                             offset: const Offset(-22, -0.5),
                             child: Image.asset(
-                              'assets/images/logo_faro.png',
-                              width: isWide ? 70 : 70,
+                              'assets/images/logo_faron.png',
+                              width: isWide ? 60 : 60,
                             ),
                           ),
                         ],

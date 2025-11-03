@@ -86,18 +86,20 @@ class _VipCasinoScreenState extends State<VipCasinoScreen> {
     final secciones = [
       if (nivelUsuario >= 1)
         {
+          'titulo': 'Nivel Principiante',
+          'tipo': 'principiante',
+          'imagen': 'assets/imgcasino/principiante1.jpeg',
+          'alignment': Alignment(0, 1),
+        },
+
+      if (nivelUsuario >= 2)
+        {
           'titulo': 'Nivel Básico',
           'tipo': 'basico',
           'imagen': 'assets/imgcasino/basico.jpeg',
-          'alignment': Alignment(0,1),
+          'alignment': Alignment(0,-0.2),
         },
-      if (nivelUsuario >= 2)
-        {
-          'titulo': 'Nivel Principiante',
-          'tipo': 'principiante',
-          'imagen': 'assets/imgcasino/principiante.jpeg',
-          'alignment': Alignment(0, -0.2),
-        },
+
       if (nivelUsuario >= 3)
         {
           'titulo': 'Nivel Intermedio',

@@ -43,21 +43,21 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: const Color(0xFFEDCBF6),
       body: Stack(
         children: [
           Center(
             child: AnimatedOpacity(
               opacity: opacityLogo1,
               duration: const Duration(seconds: 1),
-              child: Image.asset('assets/images/logo_losdealla.png', width: 200),
+              child: Image.asset('assets/images/logo_losdeallac.png', width: 200),
             ),
           ),
           Center(
             child: AnimatedOpacity(
               opacity: opacityLogo2,
               duration: const Duration(seconds: 1),
-              child: Image.asset('assets/images/logo_manoentonadas.png', width: 200),
+              child: Image.asset('assets/images/logo_manoentonadaa.png', width: 200),
             ),
           ),
           Center(
@@ -77,7 +77,7 @@ class _SplashScreenState extends State<SplashScreen> {
                   ),
                   const SizedBox(width:2),
 
-                  Image.asset('assets/images/logo_faro.png', width: 70),
+                  Image.asset('assets/images/logo_faron.png', width: 60),
                 ],
               ),
             ),
