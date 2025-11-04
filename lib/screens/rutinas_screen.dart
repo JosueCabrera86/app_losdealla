@@ -109,7 +109,8 @@ class _RutinasScreenState extends State<RutinasScreen> {
                             bottom: 0,
                             child: Center(
                               child: IconButton(
-                                icon: const Icon(Icons.chevron_right, size: 36),
+                                icon:
+                                const Icon(Icons.chevron_right, size: 36),
                                 color: Colors.black87,
                                 onPressed: () {
                                   setModalState(() {
@@ -171,11 +172,12 @@ class _RutinasScreenState extends State<RutinasScreen> {
             itemBuilder: (context, index) {
               final rutina = rutinasFiltradas[index];
               final bool esPDF = rutina['tipo'] == 'pdf';
-              final String? videoId =
-              !esPDF ? rutina['video'] : null;
-              final String? thumbnailUrl = videoId != null
+              final String? videoId = !esPDF ? rutina['video'] : null;
+              final String? thumbnailUrl = rutina['portada'] != null
+                  ? 'assets/imgminis/miniyf/${rutina['portada']}'
+                  : (videoId != null
                   ? 'https://img.youtube.com/vi/$videoId/hqdefault.jpg'
-                  : null;
+                  : null);
 
               return GestureDetector(
                 onTap: () => abrirRutina(rutina),
@@ -186,20 +188,19 @@ class _RutinasScreenState extends State<RutinasScreen> {
                     children: [
                       Container(color: Colors.grey[300]),
 
-                      if (esPDF)
-                        Image.asset(
-                          'assets/images/pdf_thumb.jpg',
-                          fit: BoxFit.cover,
-                        )
-                      else
-                        Image.network(
-                          thumbnailUrl!,
+                      // imagen o miniatura personalizada
+                      if (thumbnailUrl != null)
+                        thumbnailUrl.startsWith('assets')
+                            ? Image.asset(thumbnailUrl, fit: BoxFit.cover)
+                            : Image.network(
+                          thumbnailUrl,
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) {
                             return Container(
                               color: Colors.grey[300],
                               child: const Center(
-                                child: Icon(Icons.error, color: Colors.red, size: 40),
+                                child: Icon(Icons.error,
+                                    color: Colors.red, size: 40),
                               ),
                             );
                           },
@@ -207,6 +208,7 @@ class _RutinasScreenState extends State<RutinasScreen> {
 
                       Container(color: Colors.black.withOpacity(0.3)),
 
+                      // ==== BLOQUE COMENTADO: títulos ocultos, íconos activos ====
                       Align(
                         alignment: Alignment.center,
                         child: Column(
@@ -218,28 +220,28 @@ class _RutinasScreenState extends State<RutinasScreen> {
                                 color: Colors.white,
                                 size: 50,
                               ),
-                            const SizedBox(height: 6),
-                            Text(
-                              rutina['title'],
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                shadows: [
-                                  Shadow(
-                                    blurRadius: 4,
-                                    color: Colors.black54,
-                                    offset: Offset(1, 1),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            if (esPDF) const SizedBox(height: 4),
-                            if (esPDF)
-                              const Text(
-                                'PDF',
-                                style: TextStyle(color: Colors.white70),
-                              ),
+                            // const SizedBox(height: 6),
+                            // Text(
+                            //   rutina['title'],
+                            //   textAlign: TextAlign.center,
+                            //   style: const TextStyle(
+                            //     color: Colors.white,
+                            //     fontWeight: FontWeight.bold,
+                            //     shadows: [
+                            //       Shadow(
+                            //         blurRadius: 4,
+                            //         color: Colors.black54,
+                            //         offset: Offset(1, 1),
+                            //       ),
+                            //     ],
+                            //   ),
+                            // ),
+                            // if (esPDF) const SizedBox(height: 4),
+                            // if (esPDF)
+                            //   const Text(
+                            //     'PDF',
+                            //     style: TextStyle(color: Colors.white70),
+                            //   ),
                           ],
                         ),
                       ),

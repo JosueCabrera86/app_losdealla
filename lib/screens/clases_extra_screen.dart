@@ -32,98 +32,119 @@ class _ClasesExtraScreenState extends State<ClasesExtraScreen> {
       barrierLabel: "Cerrar",
       transitionDuration: const Duration(milliseconds: 300),
       pageBuilder: (context, anim1, anim2) {
-        return Material(
-          color: Colors.black.withOpacity(0.5),
-          child: Center(
-            child: StatefulBuilder(
-              builder: (context, setModalState) {
-                return Container(
-                  width: MediaQuery.of(context).size.width * 0.9,
-                  height: MediaQuery.of(context).size.height * 0.7,
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: clase['tipo'] == 'pdf'
-                        ? Colors.blue[50]
-                        : Colors.orange[50],
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black26,
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Stack(
-                    children: [
-                      if (clase['tipo'] == 'pdf')
-                        Center(
-                          child: Image.asset(
-                            'assets/imgsuscriptores/${clase['pdf'][imagenIndex]}',
-                            fit: BoxFit.contain,
-                            width: double.infinity,
-                            height: double.infinity,
-                          ),
-                        ),
-                      if (clase['tipo'] == 'video')
-                        YoutubePlayer(
-                          controller: YoutubePlayerController(
-                            initialVideoId: clase['video'],
-                            flags: const YoutubePlayerFlags(autoPlay: false),
-                          ),
-                          showVideoProgressIndicator: true,
-                        ),
-                      Positioned(
-                        top: 0,
-                        right: 0,
-                        child: IconButton(
-                          icon: const Icon(Icons.close, size: 28),
-                          onPressed: () => Navigator.of(context).pop(),
-                        ),
-                      ),
-                      if (clase['tipo'] == 'pdf' &&
-                          (clase['pdf'] as List).length > 1)
-                        ...[
-                          Positioned(
-                            left: 0,
-                            top: 0,
-                            bottom: 0,
-                            child: Center(
-                              child: IconButton(
-                                icon: const Icon(Icons.chevron_left, size: 36),
-                                onPressed: () {
-                                  setModalState(() {
-                                    imagenIndex = (imagenIndex - 1 +
-                                        (clase['pdf'] as List).length) %
-                                        (clase['pdf'] as List).length;
-                                  });
-                                },
-                              ),
-                            ),
-                          ),
-                          Positioned(
-                            right: 0,
-                            top: 0,
-                            bottom: 0,
-                            child: Center(
-                              child: IconButton(
-                                icon: const Icon(Icons.chevron_right, size: 36),
-                                onPressed: () {
-                                  setModalState(() {
-                                    imagenIndex = (imagenIndex + 1) %
-                                        (clase['pdf'] as List).length;
-                                  });
-                                },
-                              ),
-                            ),
+        return OrientationBuilder(
+          builder: (context, orientation) {
+            final isHorizontal = orientation == Orientation.landscape;
+            final width = isHorizontal
+                ? MediaQuery.of(context).size.width * 0.95
+                : MediaQuery.of(context).size.width * 0.9;
+            final height = isHorizontal
+                ? MediaQuery.of(context).size.height * 0.9
+                : MediaQuery.of(context).size.height * 0.7;
+
+            return Material(
+              color: Colors.black.withOpacity(0.5),
+              child: Center(
+                child: StatefulBuilder(
+                  builder: (context, setModalState) {
+                    return Container(
+                      width: width,
+                      height: height,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: clase['tipo'] == 'pdf'
+                            ? Colors.blue[50]
+                            : Colors.orange[50],
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black26,
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
                           ),
                         ],
-                    ],
-                  ),
-                );
-              },
-            ),
-          ),
+                      ),
+                      child: Stack(
+                        children: [
+                          if (clase['tipo'] == 'pdf')
+                            Center(
+                              child: Image.asset(
+                                'assets/imgsuscriptores/${clase['pdf'][imagenIndex]}',
+                                fit: BoxFit.contain,
+                                width: double.infinity,
+                                height: double.infinity,
+                              ),
+                            ),
+                          if (clase['tipo'] == 'video')
+                            Center(
+                              child: YoutubePlayer(
+                                controller: YoutubePlayerController(
+                                  initialVideoId: clase['video'],
+                                  flags: const YoutubePlayerFlags(
+                                    autoPlay: false,
+                                  ),
+                                ),
+                                showVideoProgressIndicator: true,
+                              ),
+                            ),
+                          Positioned(
+                            top: 0,
+                            right: 0,
+                            child: IconButton(
+                              icon: const Icon(Icons.close, size: 28),
+                              color: Colors.black87,
+                              onPressed: () => Navigator.of(context).pop(),
+                            ),
+                          ),
+                          if (clase['tipo'] == 'pdf' &&
+                              (clase['pdf'] as List).length > 1)
+                            ...[
+                              Positioned(
+                                left: 0,
+                                top: 0,
+                                bottom: 0,
+                                child: Center(
+                                  child: IconButton(
+                                    icon: const Icon(Icons.chevron_left,
+                                        size: 36),
+                                    color: Colors.black87,
+                                    onPressed: () {
+                                      setModalState(() {
+                                        imagenIndex = (imagenIndex - 1 +
+                                            (clase['pdf'] as List).length) %
+                                            (clase['pdf'] as List).length;
+                                      });
+                                    },
+                                  ),
+                                ),
+                              ),
+                              Positioned(
+                                right: 0,
+                                top: 0,
+                                bottom: 0,
+                                child: Center(
+                                  child: IconButton(
+                                    icon: const Icon(Icons.chevron_right,
+                                        size: 36),
+                                    color: Colors.black87,
+                                    onPressed: () {
+                                      setModalState(() {
+                                        imagenIndex = (imagenIndex + 1) %
+                                            (clase['pdf'] as List).length;
+                                      });
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ],
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            );
+          },
         );
       },
       transitionBuilder: (context, anim1, anim2, child) {
@@ -148,6 +169,7 @@ class _ClasesExtraScreenState extends State<ClasesExtraScreen> {
           onPressed: widget.onClose,
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.orangeAccent,
+            foregroundColor: Colors.white,
           ),
           child: const Text('Cerrar clases extra'),
         ),
@@ -167,11 +189,12 @@ class _ClasesExtraScreenState extends State<ClasesExtraScreen> {
             itemBuilder: (context, index) {
               final clase = clasesFiltradas[index];
               final bool esPDF = clase['tipo'] == 'pdf';
-              final String? videoId =
-              !esPDF ? clase['video'] : null;
-              final String? thumbnailUrl = videoId != null
+              final String? videoId = !esPDF ? clase['video'] : null;
+              final String? thumbnailUrl = clase['portada'] != null
+                  ? 'assets/imgminis/miniyf/${clase['portada']}'
+                  : (videoId != null
                   ? 'https://img.youtube.com/vi/$videoId/hqdefault.jpg'
-                  : null;
+                  : null);
 
               return GestureDetector(
                 onTap: () => abrirClase(clase),
@@ -182,20 +205,19 @@ class _ClasesExtraScreenState extends State<ClasesExtraScreen> {
                     children: [
                       Container(color: Colors.grey[300]),
 
-                      if (esPDF)
-                        Image.asset(
-                          'assets/images/pdf_thumb.jpg',
-                          fit: BoxFit.cover,
-                        )
-                      else
-                        Image.network(
-                          thumbnailUrl!,
+                      // imagen o miniatura personalizada
+                      if (thumbnailUrl != null)
+                        thumbnailUrl.startsWith('assets')
+                            ? Image.asset(thumbnailUrl, fit: BoxFit.cover)
+                            : Image.network(
+                          thumbnailUrl,
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) {
                             return Container(
                               color: Colors.grey[300],
                               child: const Center(
-                                child: Icon(Icons.error, color: Colors.red, size: 40),
+                                child: Icon(Icons.error,
+                                    color: Colors.red, size: 40),
                               ),
                             );
                           },
@@ -203,6 +225,7 @@ class _ClasesExtraScreenState extends State<ClasesExtraScreen> {
 
                       Container(color: Colors.black.withOpacity(0.3)),
 
+                      // ==== títulos ocultos, íconos activos ====
                       Align(
                         alignment: Alignment.center,
                         child: Column(
@@ -214,28 +237,28 @@ class _ClasesExtraScreenState extends State<ClasesExtraScreen> {
                                 color: Colors.white,
                                 size: 50,
                               ),
-                            const SizedBox(height: 6),
-                            Text(
-                              clase['title'],
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                shadows: [
-                                  Shadow(
-                                    blurRadius: 4,
-                                    color: Colors.black54,
-                                    offset: Offset(1, 1),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            if (esPDF) const SizedBox(height: 4),
-                            if (esPDF)
-                              const Text(
-                                'PDF',
-                                style: TextStyle(color: Colors.white70),
-                              ),
+                            // const SizedBox(height: 6),
+                            // Text(
+                            //   clase['title'],
+                            //   textAlign: TextAlign.center,
+                            //   style: const TextStyle(
+                            //     color: Colors.white,
+                            //     fontWeight: FontWeight.bold,
+                            //     shadows: [
+                            //       Shadow(
+                            //         blurRadius: 4,
+                            //         color: Colors.black54,
+                            //         offset: Offset(1, 1),
+                            //       ),
+                            //     ],
+                            //   ),
+                            // ),
+                            // if (esPDF) const SizedBox(height: 4),
+                            // if (esPDF)
+                            //   const Text(
+                            //     'PDF',
+                            //     style: TextStyle(color: Colors.white70),
+                            //   ),
                           ],
                         ),
                       ),

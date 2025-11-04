@@ -18,28 +18,57 @@ class NivelAvanzado extends StatefulWidget {
 }
 
 class _NivelAvanzadoState extends State<NivelAvanzado> {
-  int? _seleccionIndex;
-  Map<String, dynamic>? _seleccionado;
   YoutubePlayerController? _controller;
 
   final List<Map<String, dynamic>> base = [
-    {'categoria': 3, 'tipo': 'video', 'title': 'Posición Cerrada', 'video': 'u2OEmNMYTCw'},
-    {'categoria': 3, 'tipo': 'video', 'title': 'Desplazamientos', 'video': 'K4bLW4_-w9Q'},
-    {'categoria': 3, 'tipo': 'video', 'title': 'Sácala y peinate', 'video': 'gYRVZobHOeE'},
-    {'categoria': 3, 'tipo': 'video', 'title': 'Rodeo', 'video': 'gYRVZobHOeE'},
-    {'categoria': 3, 'tipo': 'video', 'title': 'Pasea y Pasea con sácala', 'video': 'gYRVZobHOeE'},
-    {'categoria': 3, 'tipo': 'video', 'title': 'Dile que no', 'video': 'gYRVZobHOeE'},
+    {
+      'categoria': 3,
+      'tipo': 'video',
+      'title': 'Posición Cerrada',
+      'video': 'u2OEmNMYTCw',
+      'portada': '1.png',
+    },
+    {
+      'categoria': 3,
+      'tipo': 'video',
+      'title': 'Desplazamientos',
+      'video': 'K4bLW4_-w9Q',
+      'portada': '2.png',
+    },
+    {
+      'categoria': 3,
+      'tipo': 'video',
+      'title': 'Sácala y peinate',
+      'video': 'gYRVZobHOeE',
+      'portada': '3.png',
+    },
+    {
+      'categoria': 3,
+      'tipo': 'video',
+      'title': 'Rodeo',
+      'video': 'gYRVZobHOeE',
+      'portada': '4.png',
+    },
+    {
+      'categoria': 3,
+      'tipo': 'video',
+      'title': 'Pasea y Pasea con sácala',
+      'video': 'gYRVZobHOeE',
+      'portada': '5.png',
+    },
+    {
+      'categoria': 3,
+      'tipo': 'video',
+      'title': 'Dile que no',
+      'video': 'gYRVZobHOeE',
+      'portada': '6.png',
+    },
   ];
 
   List<Map<String, dynamic>> get filtrado =>
       base.where((m) => (m['categoria'] ?? 0) <= widget.nivelUsuario).toList();
 
   void abrirRutina(Map<String, dynamic> rutina) {
-    setState(() {
-      _seleccionado = rutina;
-      _seleccionIndex = 0;
-    });
-
     if (rutina['tipo'] == 'video') {
       final videoId = rutina['video'];
       _controller = YoutubePlayerController(
@@ -50,60 +79,78 @@ class _NivelAvanzadoState extends State<NivelAvanzado> {
       showGeneralDialog(
         context: context,
         barrierDismissible: true,
-        barrierLabel: '',
-        barrierColor: Colors.black.withOpacity(0.95),
+        barrierLabel: "Cerrar",
+        barrierColor: Colors.black.withOpacity(0.7),
         transitionDuration: const Duration(milliseconds: 200),
         pageBuilder: (context, anim1, anim2) {
-          return YoutubePlayerBuilder(
-            player: YoutubePlayer(
-              controller: _controller!,
-              showVideoProgressIndicator: true,
-              progressIndicatorColor: Colors.amber,
-            ),
-            builder: (context, player) => Scaffold(
-              backgroundColor: Colors.black,
-              body: SafeArea(
-                child: Stack(
-                  children: [
-                    Center(child: player),
-                    Positioned(
-                      top: 16,
-                      right: 16,
-                      child: IconButton(
-                        icon: const Icon(Icons.close, color: Colors.white, size: 30),
-                        onPressed: () {
-                          _controller?.pause();
-                          Navigator.pop(context);
-                          cerrarRutina();
-                        },
+          return OrientationBuilder(
+            builder: (context, orientation) {
+              final bool isLandscape = orientation == Orientation.landscape;
+
+              return Center(
+                child: Container(
+                  width: isLandscape
+                      ? MediaQuery.of(context).size.width
+                      : MediaQuery.of(context).size.width * 0.9,
+                  height: isLandscape
+                      ? MediaQuery.of(context).size.height
+                      : MediaQuery.of(context).size.height * 0.6,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.black,
+                    borderRadius:
+                    isLandscape ? null : BorderRadius.circular(20),
+                  ),
+                  child: Stack(
+                    children: [
+                      Center(
+                        child: YoutubePlayer(
+                          controller: _controller!,
+                          showVideoProgressIndicator: true,
+                        ),
                       ),
-                    ),
-                  ],
+                      Positioned(
+                        top: 10,
+                        right: 10,
+                        child: IconButton(
+                          icon: const Icon(Icons.close,
+                              color: Colors.white, size: 28),
+                          onPressed: () {
+                            _controller?.pause();
+                            Navigator.of(context).pop();
+                            _controller?.dispose();
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ),
+              );
+            },
           );
         },
       );
     }
   }
 
-  void cerrarRutina() {
+  @override
+  void dispose() {
     _controller?.dispose();
-    _controller = null;
-    setState(() {
-      _seleccionado = null;
-      _seleccionIndex = null;
-    });
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final paddingLateral = 8.0;
+
     return Column(
       children: [
         ElevatedButton(
           onPressed: widget.onClose,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.deepPurpleAccent,
+            foregroundColor: Colors.white,
+          ),
           child: const Text('Cerrar Nivel Avanzado'),
         ),
         const SizedBox(height: 12),
@@ -134,37 +181,48 @@ class _NivelAvanzadoState extends State<NivelAvanzado> {
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
-                      if (esPDF)
+                      Container(color: Colors.grey[300]),
+
+                      // Portada local si existe
+                      if (rutina['portada'] != null)
+                        Image.asset(
+                          'assets/imgminis/miniyf/${rutina['portada']}',
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                              Image.network(
+                                thumbnailUrl ??
+                                    'https://img.youtube.com/vi/$videoId/hqdefault.jpg',
+                                fit: BoxFit.cover,
+                              ),
+                        )
+                      else if (esPDF)
                         Image.asset(
                           'assets/images/pdf_thumb.jpg',
                           fit: BoxFit.cover,
                         )
                       else
                         Image.network(
-                          thumbnailUrl!,
+                          thumbnailUrl ??
+                              'https://img.youtube.com/vi/$videoId/hqdefault.jpg',
                           fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) =>
-                              Container(color: Colors.grey[300], child: const Icon(Icons.error, color: Colors.red, size: 40)),
                         ),
+
                       Container(color: Colors.black.withOpacity(0.3)),
+
                       Align(
                         alignment: Alignment.center,
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            if (!esPDF) const Icon(Icons.play_circle_fill, color: Colors.white, size: 50),
-                            const SizedBox(height: 6),
-                            Text(
-                              rutina['title'],
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                shadows: [Shadow(blurRadius: 4, color: Colors.black54, offset: Offset(1, 1))],
+                            if (!esPDF)
+                              const Icon(Icons.play_circle_fill,
+                                  color: Colors.white, size: 50),
+                            // títulos ocultos
+                            if (esPDF)
+                              const Text(
+                                'PDF',
+                                style: TextStyle(color: Colors.white70),
                               ),
-                            ),
-                            if (esPDF) const SizedBox(height: 4),
-                            if (esPDF) const Text('PDF', style: TextStyle(color: Colors.white70)),
                           ],
                         ),
                       ),
