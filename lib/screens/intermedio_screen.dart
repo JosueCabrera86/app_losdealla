@@ -21,12 +21,69 @@ class _NivelIntermedioState extends State<NivelIntermedio> {
   YoutubePlayerController? _controller;
 
   final List<Map<String, dynamic>> base = [
-    {'categoria': 2, 'tipo': 'video', 'title': 'Posición Cerrada', 'video': 'u2OEmNMYTCw', 'portada': '1.png'},
-    {'categoria': 2, 'tipo': 'video', 'title': 'Desplazamientos', 'video': 'K4bLW4_-w9Q', 'portada': '2.png'},
-    {'categoria': 2, 'tipo': 'video', 'title': 'Sácala y peinate', 'video': 'gYRVZobHOeE', 'portada': '3.png'},
-    {'categoria': 2, 'tipo': 'video', 'title': 'Rodeo', 'video': 'gYRVZobHOeE', 'portada': '4.png'},
-    {'categoria': 2, 'tipo': 'video', 'title': 'Pasea y Pasea con sácala', 'video': 'gYRVZobHOeE', 'portada': '5.png'},
-    {'categoria': 2, 'tipo': 'video', 'title': 'Dile que no', 'video': 'gYRVZobHOeE', 'portada': '6.png'},
+    {
+      'categoria': 3,
+      'tipo': "video",
+      'title': "Kentucky",
+      'video': "YNDkKzYqyOE",
+      'portada': "16_intermedio_kentucky.png",
+    },
+    {
+      'categoria': 3,
+      'tipo': "video",
+      'title': "Amistad Cuba Jamaica",
+      'video': "MrAWlOLoG6Y",
+      'portada': "17_intermedio_amistadcubajamaica.png",
+    },
+    {
+      'categoria': 3,
+      'tipo': "video",
+      'title': "Setenta (70)",
+      'video': "ZS7u4lWlrvo",
+      'portada': "18_intermedio_setenta.png",
+    },
+    {
+      'categoria': 3,
+      'tipo': "video",
+      'title': "Setentas (70´s)",
+      'video': "Ly1M2z93QLc",
+      'portada': "19_intermedio_setentas.png",
+    },
+    {
+      'categoria': 3,
+      'tipo': "video",
+      'title': "Sombrero",
+      'video': "WgOqgojrGYE",
+      'portada': "20_intermedio_sombrero.png",
+    },
+    {
+      'categoria': 3,
+      'tipo': "video",
+      'title': "Caracol",
+      'video': "IFzsSENZm04",
+      'portada': "21_intermedio_caracol.png",
+    },
+    {
+      'categoria': 3,
+      'tipo': "video",
+      'title': "Copa",
+      'video': "n_FYzQ987yA",
+      'portada': "22_intermedio_copa.png",
+    },
+    {
+      'categoria': 3,
+      'tipo': "video",
+      'title': "Azúcar",
+      'video': "iNevd-mHIyA",
+      'portada': "23_intermedio_azucar.png",
+    },
+    {
+      'categoria': 3,
+      'tipo': "video",
+      'title': "Bayamo por arriba",
+      'video': "1j4-yoml2E8",
+      'portada': "24_intermedio_bayamoporarriba.png",
+    },
   ];
 
   List<Map<String, dynamic>> get filtrado =>

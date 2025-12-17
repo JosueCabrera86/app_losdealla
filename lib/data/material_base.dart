@@ -9,7 +9,7 @@ final List<Map<String, dynamic>> rutinasBase = [
   {'categoria': 15, 'tipo': 'video', 'title': '4. Nariz, labios y nasolabiales', 'video': 'v0nMSc7bDEI','portada':'17.png'},
   {'categoria': 17, 'tipo': 'pdf', 'title': '5. Pómulos y sonrisa', 'pdf': ['pomulos_y_sonrisa_1.png','pomulos_y_sonrisa_2.png','pomulos_y_sonrisa_3.png','frente_y_ojos_4.png'],'portada':'5.png'},
   {'categoria': 18, 'tipo': 'video', 'title': '5. Pómulos y sonrisa', 'video': 'uPnft5T1_Ps', 'portada':'18.png'},
-  {'categoria': 20, 'tipo': 'video', 'title': '6. Acupresión avanzada', 'video': 'BoCZ0nkv58M', 'portada':'7.png'},
+  {'categoria': 21, 'tipo': "video", 'title': "6. Rutina avanzada", 'video': "BoCZ0nkv58M", 'portada': "24.png",},
 ];
 
 final List<Map<String, dynamic>> clasesBase = [
@@ -27,4 +27,6 @@ final List<Map<String, dynamic>> masajesBase = [
   {'categoria': 9, 'tipo': 'video', 'title': 'Masaje con guasha', 'video': 'jPAeiOlCrv0', 'portada':'11.png'},
   {'categoria': 13, 'tipo': 'video', 'title': 'Masaje relajante', 'video': 'ke_h99NelDM', 'portada':'12.png'},
   {'categoria': 19, 'tipo': 'pdf', 'title': 'Masaje de acupresión', 'pdf': ['acupresion_avanzados.png'], 'portada':'6.png'},
+  {'categoria': 20, 'tipo': 'video', 'title': '6. Acupresión avanzada', 'video': 'BoCZ0nkv58M', 'portada':'7.png'},
+
 ];
