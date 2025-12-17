@@ -1,7 +1,8 @@
-import 'dart:convert';
+
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
 
 class LoginScreen extends StatefulWidget {
   final String tipo; // 'yoga' o 'casino'
@@ -34,40 +35,59 @@ class _LoginScreenState extends State<LoginScreen> {
       loading = true;
     });
 
-    try {
-      final url = Uri.parse('https://backendlda.onrender.com/login');
-      print('🔹 Intentando conexión con $url');
-      print('🔹 Datos enviados: $email / $password');
+    final supabase = Supabase.instance.client;
 
-      final res = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'email': email, 'password': password}),
+    try {
+      // 1️⃣ LOGIN
+      final AuthResponse res = await supabase.auth.signInWithPassword(
+        email: email,
+        password: password,
       );
 
-      print('🔹 Status code: ${res.statusCode}');
-      print('🔹 Body: ${res.body}');
+      final user = res.user;
+      final session = res.session;
 
-      final data = jsonDecode(res.body);
-
-      if (res.statusCode == 200 && data['token'] != null) {
-        final token = data['token'];
-        final rol = data['rol'] ?? widget.tipo;
-
-        await storage.write(key: 'token', value: token);
-        await storage.write(key: 'rol', value: rol);
-
-        if (rol == 'casino' || widget.tipo == 'casino') {
-          Navigator.pushReplacementNamed(context, '/vipcasino');
-        } else {
-          Navigator.pushReplacementNamed(context, '/suscriptoresyf');
-        }
-      } else {
-        setState(() => error = data['error'] ?? 'Credenciales incorrectas');
+      if (user == null || session == null) {
+        setState(() => error = 'Credenciales incorrectas');
+        return;
       }
+      debugPrint('Auth user: ${user?.id}');
+      debugPrint('Session: ${session?.accessToken != null}');
+
+      // 2️⃣ GUARDAR TOKEN
+      await storage.write(
+        key: 'token',
+        value: session.accessToken,
+      );
+
+      // 3️⃣ OBTENER PERFIL (tabla users)
+      final profile = await supabase
+          .from('users')
+          .select('*')
+          .eq('auth_id', user.id)
+          .single();
+
+      final rol = profile['rol'];
+      final disciplina = profile['disciplina'];
+
+
+      // 5️⃣ GUARDAR DATOS
+      await storage.write(key: 'user_id', value: profile['id'].toString());
+      await storage.write(key: 'user_email', value: user.email);
+      await storage.write(key: 'user_categoria',value: profile['categoria'].toString(),);
+      await storage.write(key: 'user_disciplina', value: disciplina);
+      await storage.write(key: 'user_rol', value: rol);
+
+      // 6️⃣ NAVEGACIÓN
+      if (widget.tipo == 'casino') {
+        Navigator.pushReplacementNamed(context, '/vipcasino');
+      } else {
+        Navigator.pushReplacementNamed(context, '/suscriptoresyf');
+      }
+    } on AuthException catch (e) {
+      setState(() => error = e.message);
     } catch (e) {
-      print('🚨 Error al conectar con el servidor: $e');
-      setState(() => error = 'Error al conectar con el servidor: $e');
+      setState(() => error = 'Error inesperado: $e');
     } finally {
       setState(() => loading = false);
     }

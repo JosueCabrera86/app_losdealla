@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'modales_yoga.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:app_losdealla/data/material_base.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
 
 class SuscriptoresYFScreen extends StatefulWidget {
   const SuscriptoresYFScreen({super.key});
@@ -13,7 +12,7 @@ class SuscriptoresYFScreen extends StatefulWidget {
 }
 
 class _SuscriptoresYFScreenState extends State<SuscriptoresYFScreen> {
-  final storage = const FlutterSecureStorage();
+
   int nivelUsuario = 0;
   String? modalAbierto;
   String? error;
@@ -31,43 +30,49 @@ class _SuscriptoresYFScreenState extends State<SuscriptoresYFScreen> {
       error = null;
     });
 
-    final token = (await storage.read(key: 'token'))?.trim() ?? '';
-    if (token.isEmpty) {
-      setState(() {
-        error = "No estás autorizado. Por favor inicia sesión.";
-        cargando = false;
-      });
-      Future.microtask(() {
-        Navigator.pushReplacementNamed(context, '/login', arguments: {'tipo': 'yoga'});
-      });
-      return;
-    }
-
     try {
-      final uri = Uri.parse("https://backendlda.onrender.com/api/yoga-facial/material");
-      final response = await http.get(uri, headers: {"Authorization": "Bearer $token"});
+      final supabase = Supabase.instance.client;
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final nivel = data['nivel'] ?? 0;
+      // 1️⃣ Verificar sesión activa
+      final session = supabase.auth.currentSession;
+
+      if (session == null) {
         setState(() {
-          nivelUsuario = nivel;
+          error = "Sesión no válida. Cierra e inicia sesión nuevamente.";
           cargando = false;
         });
-      } else {
-        final data = jsonDecode(response.body);
-        setState(() {
-          error = data['error'] ?? data['message'] ?? "Error al cargar material.";
-          cargando = false;
-        });
+        return;
       }
-    } catch (e) {
+
+      // 2️⃣ Obtener email del usuario
+      final email = session.user.email!;
+
+      // 3️⃣ Obtener categoría desde Supabase
+      final response = await supabase
+          .from('users')
+          .select('categoria')
+          .eq('email', email)
+          .single();
+
       setState(() {
-        error = "Error al conectar con el servidor: $e";
+        nivelUsuario = response['categoria'] ?? 0;
         cargando = false;
       });
-    }
-  }
+    } on PostgrestException catch (e) {
+      setState(() {
+        error = e.message;
+        cargando = false;
+      });
+    } catch (e, stack) {
+  debugPrint('LOGIN ERROR: $e');
+  debugPrint('STACK: $stack');
+
+  setState(() {
+  error = e.toString();
+  });
+}
+
+}
 
   void abrirModal(String tipo) => setState(() => modalAbierto = tipo);
   void cerrarModal() => setState(() => modalAbierto = null);

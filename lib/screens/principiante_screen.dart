@@ -23,24 +23,24 @@ class _NivelPrincipianteState extends State<NivelPrincipiante> {
   final List<Map<String, dynamic>> base = [
     {
       'categoria': 1,
-      'tipo': 'video',
-      'title': 'Bases',
-      'video': 'u2OEmNMYTCw',
-      'portada': '1.png',
+      'tipo': "video",
+      'title': "Bases",
+      'video': "XETFTkoGEp8",
+      'portada': "principiante_bases.png",
     },
     {
       'categoria': 1,
-      'tipo': 'video',
-      'title': 'Vueltas',
-      'video': 'K4bLW4_-w9Q',
-      'portada': '2.png',
+      'tipo': "video",
+      'title': "Vueltas",
+      'video': "U8n-lN2MHME",
+      'portada': "principiante_vueltas.png",
     },
     {
       'categoria': 1,
-      'tipo': 'video',
-      'title': 'Desplazamientos',
-      'video': 'gYRVZobHOeE',
-      'portada': '3.png',
+      'tipo': "video",
+      'title': "Desplazamientos",
+      'video': "WE-IN_edMrI",
+      'portada': "principiante_desplazamientos.png",
     },
   ];
 

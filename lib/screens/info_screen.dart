@@ -62,7 +62,7 @@ class _InfoScreenState extends State<InfoScreen> {
 
                       // Texto secundario
                       const Text(
-                        'Proyecto beneficiario del programa\nFARO del bienestar – FORACC 2025',
+                        'Proyecto beneficiario del programa\nFARO del bienestar modalidad: Fortalecimientos de los agentes culturales comunitarios – FORACC 2025',
                         textAlign: TextAlign.center,
                         style: TextStyle(color: Colors.deepPurpleAccent, fontSize: 15),
                       ),
