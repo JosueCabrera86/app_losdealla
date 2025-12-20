@@ -13,7 +13,7 @@ class _InfoScreenState extends State<InfoScreen> {
   void initState() {
     super.initState();
 
-    Timer(const Duration(seconds: 10), () {
+    Timer(const Duration(seconds: 5), () {
       Navigator.pushReplacementNamed(context, '/home');
     });
   }
@@ -37,7 +37,7 @@ class _InfoScreenState extends State<InfoScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // Logos superiores
+
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -61,14 +61,21 @@ class _InfoScreenState extends State<InfoScreen> {
                       const SizedBox(height: 16),
 
                       // Texto secundario
-                      const Text(
-                        'Proyecto beneficiario del programa\nFARO del bienestar modalidad: Fortalecimientos de los agentes culturales comunitarios – FORACC 2025',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.deepPurpleAccent, fontSize: 15),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20.0), // Margen adicional solo aquí
+                        child: const Text(
+                          'Proyecto beneficiario del programa\n  FARO del bienestar modalidad: \n Fortalecimiento de los agentes culturales comunitarios FORACC 2025',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              color: Colors.deepPurpleAccent,
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold
+                          ),
+                        ),
                       ),
                       SizedBox(height: isWide ? 70 : 50),
 
-                      // 🔹 Logos institucionales — misma fila en ambas versiones
+
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,

@@ -54,7 +54,7 @@ class _ClasesExtraScreenState extends State<ClasesExtraScreen> {
                       decoration: BoxDecoration(
                         color: clase['tipo'] == 'pdf'
                             ? Colors.blue[50]
-                            : Colors.orange[50],
+                            : Colors.pink[50],
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
@@ -168,7 +168,7 @@ class _ClasesExtraScreenState extends State<ClasesExtraScreen> {
         ElevatedButton(
           onPressed: widget.onClose,
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.orangeAccent,
+            backgroundColor: Colors.blueAccent,
             foregroundColor: Colors.white,
           ),
           child: const Text('Cerrar clases extra'),

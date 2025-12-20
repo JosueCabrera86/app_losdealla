@@ -44,7 +44,7 @@ class _RutinasScreenState extends State<RutinasScreen> {
                   decoration: BoxDecoration(
                     color: rutina['tipo'] == 'pdf'
                         ? Colors.blue[50]
-                        : Colors.orange[50],
+                        : Colors.pink [50],
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(

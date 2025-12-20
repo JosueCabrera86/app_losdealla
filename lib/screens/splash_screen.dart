@@ -35,7 +35,7 @@ class _SplashScreenState extends State<SplashScreen> {
       });
     });
 
-    Timer(const Duration(seconds: 8), () {
+    Timer(const Duration(seconds: 7), () {
       Navigator.pushReplacementNamed(context, '/info');
     });
   }

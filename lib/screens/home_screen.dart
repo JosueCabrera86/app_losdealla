@@ -30,15 +30,16 @@ class _HomeScreenState extends State<HomeScreen>
     final padding = isLandscape ? 32.0 : 24.0;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFEDCBF6),
       appBar: AppBar(
+        toolbarHeight: 90,
         centerTitle: true,
         title: const Text(
           'Material Adicional',
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: Colors.white,
-            fontSize: 20,
+            fontSize: 22,
           ),
         ),
         backgroundColor: const Color(0xFF4B0082),
@@ -51,7 +52,7 @@ class _HomeScreenState extends State<HomeScreen>
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                '¡Hola, nos da mucho gusto que estés aquí!',
+                '¡Nos da mucho gusto que estés aquí!',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: size.width * 0.05,
@@ -65,16 +66,17 @@ class _HomeScreenState extends State<HomeScreen>
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: size.width * 0.04,
-                  color: Colors.black87,
+                  color: Colors.purple,
+                  fontWeight: FontWeight.bold,
+
                 ),
               ),
               const SizedBox(height: 40),
 
-              // 🔹 Opciones alineadas en horizontal o vertical
               if (isLandscape)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  crossAxisAlignment: CrossAxisAlignment.start, // 🔸 Clave para alinear arriba
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
                       child: _buildOption(

@@ -47,7 +47,7 @@ class _SuscriptoresYFScreenState extends State<SuscriptoresYFScreen> {
       // 2️⃣ Obtener email del usuario
       final email = session.user.email!;
 
-      // 3️⃣ Obtener categoría desde Supabase
+
       final response = await supabase
           .from('users')
           .select('categoria')
@@ -83,7 +83,7 @@ class _SuscriptoresYFScreenState extends State<SuscriptoresYFScreen> {
     final width = size.width;
     final isLandscape = size.width > size.height;
 
-    // 🔹 Altura de la portada según orientación
+
     final portadaHeight = isLandscape ? size.height * 0.6 : size.height * 0.4;
 
     if (cargando) {
@@ -134,7 +134,7 @@ class _SuscriptoresYFScreenState extends State<SuscriptoresYFScreen> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // 🌄 Portada principal
+
             Stack(
               children: [
                 Image.asset(
@@ -142,7 +142,7 @@ class _SuscriptoresYFScreenState extends State<SuscriptoresYFScreen> {
                   width: double.infinity,
                   height: portadaHeight,
                   fit: BoxFit.cover,
-                  alignment: Alignment(0, -0.7), // ajustar inicio de la imagen
+                  alignment: Alignment(0, -0.7),
                 ),
                 Container(
                   width: double.infinity,
@@ -194,7 +194,7 @@ class _SuscriptoresYFScreenState extends State<SuscriptoresYFScreen> {
                 child: Text(error!, style: const TextStyle(color: Colors.red)),
               ),
 
-            // 🌸 Tarjetas visuales
+
             if (modalAbierto == null)
               Padding(
                 padding: const EdgeInsets.all(16),
@@ -205,7 +205,7 @@ class _SuscriptoresYFScreenState extends State<SuscriptoresYFScreen> {
                     final imagen = sec['imagen'] as String;
                     final alignment = sec['alignment'] as Alignment;
 
-                    // 🔹 Ajuste ancho y alto según orientación
+
                     final cardWidth = isLandscape ? width * 0.7 : width * 0.9;
                     final cardHeight = isLandscape ? 180.0 : 140.0;
 
@@ -255,7 +255,6 @@ class _SuscriptoresYFScreenState extends State<SuscriptoresYFScreen> {
                 ),
               ),
 
-            // 🌿 Modales según tipo
             if (modalAbierto == 'rutinas')
               RutinasScreen(
                 material: rutinasPermitidas,

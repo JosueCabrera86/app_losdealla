@@ -49,7 +49,7 @@ class _MasajesScreenState extends State<MasajesScreen> {
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: masaje['tipo'] == 'pdf'
-                            ? Colors.deepPurple[50]
+                            ? Colors.blue[50]
                             : Colors.pink[50],
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
@@ -160,7 +160,7 @@ class _MasajesScreenState extends State<MasajesScreen> {
         ElevatedButton(
           onPressed: widget.onClose,
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.deepPurpleAccent,
+            backgroundColor: Colors.blueAccent,
             foregroundColor: Colors.white,
           ),
           child: const Text('Cerrar masajes'),
@@ -225,7 +225,7 @@ class _MasajesScreenState extends State<MasajesScreen> {
                             if (!esPDF)
                               const Icon(
                                 Icons.play_circle_fill,
-                                color: Colors.white,
+                                color: Colors.white70,
                                 size: 50,
                               ),
                             // const SizedBox(height: 6),

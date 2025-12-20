@@ -5,7 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 
 class LoginScreen extends StatefulWidget {
-  final String tipo; // 'yoga' o 'casino'
+  final String tipo;
   const LoginScreen({super.key, required this.tipo});
 
   @override
@@ -38,7 +38,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final supabase = Supabase.instance.client;
 
     try {
-      // 1️⃣ LOGIN
+
       final AuthResponse res = await supabase.auth.signInWithPassword(
         email: email,
         password: password,
@@ -54,13 +54,12 @@ class _LoginScreenState extends State<LoginScreen> {
       debugPrint('Auth user: ${user?.id}');
       debugPrint('Session: ${session?.accessToken != null}');
 
-      // 2️⃣ GUARDAR TOKEN
+
       await storage.write(
         key: 'token',
         value: session.accessToken,
       );
 
-      // 3️⃣ OBTENER PERFIL (tabla users)
       final profile = await supabase
           .from('users')
           .select('*')
@@ -71,14 +70,14 @@ class _LoginScreenState extends State<LoginScreen> {
       final disciplina = profile['disciplina'];
 
 
-      // 5️⃣ GUARDAR DATOS
+
       await storage.write(key: 'user_id', value: profile['id'].toString());
       await storage.write(key: 'user_email', value: user.email);
       await storage.write(key: 'user_categoria',value: profile['categoria'].toString(),);
       await storage.write(key: 'user_disciplina', value: disciplina);
       await storage.write(key: 'user_rol', value: rol);
 
-      // 6️⃣ NAVEGACIÓN
+
       if (widget.tipo == 'casino') {
         Navigator.pushReplacementNamed(context, '/vipcasino');
       } else {
@@ -96,22 +95,41 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final colorLila = const Color(0xFF660099);
-    final colorAzul = const Color(0xFFF5F5F5);
+    final colorAzul = const Color(0xFFF9F9F9);
 
     final size = MediaQuery.of(context).size;
     final isLandscape = size.width > size.height;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFEDCBF6),
       appBar: AppBar(
-        centerTitle: true, // ✅ Centra el título en todas las pantallas
-        title: Text(
-          widget.tipo == 'casino'
-              ? 'Material Adicional Casino'
-              : 'Material Adicional Yoga Facial',
-          textAlign: TextAlign.center,
-        ),
+        toolbarHeight: 90,
+        centerTitle: true,
+        iconTheme: const IconThemeData(color: Colors.white),
         backgroundColor: colorLila,
+        title: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Material Adicional',
+              style: TextStyle(
+                color: colorAzul,
+                fontSize: 18,
+                  fontWeight: FontWeight.bold ),
+            ),
+            Text(
+              widget.tipo == 'casino' ? 'Casino' : 'Yoga Facial',
+              style: TextStyle(
+                color: colorAzul,
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+              ),
+            ),
+          ],
+        ),
+
+
+
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {
@@ -121,7 +139,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
           return Center(
             child: SingleChildScrollView(
-              padding: EdgeInsets.symmetric(horizontal: paddingHorizontal, vertical: 24),
+              padding: EdgeInsets.symmetric(horizontal: paddingHorizontal, vertical: 16),
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 500),
                 child: Column(

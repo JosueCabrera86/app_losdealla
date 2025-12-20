@@ -30,7 +30,7 @@ class _VipCasinoScreenState extends State<VipCasinoScreen> {
     try {
       final supabase = Supabase.instance.client;
 
-      // 1️⃣ Verificar sesión activa
+
       final session = supabase.auth.currentSession;
 
       if (session == null) {
@@ -41,10 +41,10 @@ class _VipCasinoScreenState extends State<VipCasinoScreen> {
         return;
       }
 
-      // 2️⃣ Obtener email del usuario
+
       final email = session.user.email!;
 
-      // 3️⃣ Obtener categoría desde Supabase
+
       final response = await supabase
           .from('users')
           .select('categoria')
@@ -118,15 +118,15 @@ class _VipCasinoScreenState extends State<VipCasinoScreen> {
         },
     ];
 
-    // 🔹 Altura de la portada según orientación
+
     final portadaHeight = isLandscape ? size.height * 0.6 : size.height * 0.4;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.grey[100],
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // 🌄 Portada principal
+
             Stack(
               children: [
                 Image.asset(
@@ -134,7 +134,7 @@ class _VipCasinoScreenState extends State<VipCasinoScreen> {
                   width: double.infinity,
                   height: portadaHeight,
                   fit: BoxFit.cover,
-                  alignment: Alignment(0, 0), // puedes cambiarlo a (0,0) o (-0.5,0) según quieras
+                  alignment: Alignment(0, 0),
                 ),
                 Container(
                   width: double.infinity,
@@ -175,7 +175,7 @@ class _VipCasinoScreenState extends State<VipCasinoScreen> {
               child: Text(
                 '¡Hola! Este espacio está diseñado para acompañarte en tu proceso de formación en Casino (Salsa cubana) y fortalecer tu práctica.',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16, color: Colors.deepPurple[400]),
+                style: TextStyle(fontSize: 16, color: Colors.deepPurple[500]),
               ),
             ),
             const SizedBox(height: 20),
@@ -186,7 +186,7 @@ class _VipCasinoScreenState extends State<VipCasinoScreen> {
                 child: Text(error!, style: const TextStyle(color: Colors.red)),
               ),
 
-            // 🎴 Tarjetas por nivel
+
             if (modalAbierto == null)
               Padding(
                 padding: const EdgeInsets.all(16),
@@ -197,7 +197,7 @@ class _VipCasinoScreenState extends State<VipCasinoScreen> {
                     final imagen = sec['imagen'] as String;
                     final alignment = sec['alignment'] as Alignment;
 
-                    // 🔹 Ajuste ancho y alto según orientación
+
                     final cardWidth = isLandscape ? width * 0.7 : width * 0.9;
                     final cardHeight = isLandscape ? 180.0 : 140.0;
 
@@ -247,7 +247,7 @@ class _VipCasinoScreenState extends State<VipCasinoScreen> {
                 ),
               ),
 
-            // 🎬 Modales según nivel
+
             if (modalAbierto == 'basico')
               NivelBasico(nivelUsuario: nivelUsuario, material: [], onClose: cerrarModal),
             if (modalAbierto == 'principiante')
