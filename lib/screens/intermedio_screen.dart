@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // IMPORTANTE para SystemChrome
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+import 'package:flutter/services.dart';
 
 class NivelIntermedio extends StatefulWidget {
   final List<dynamic> material;
@@ -95,8 +95,7 @@ class _NivelIntermedioState extends State<NivelIntermedio> {
 
     final videoId = rutina['video'];
 
-    // Forzar Horizontal al abrir
-    SystemChrome.setPreferredOrientations([
+      SystemChrome.setPreferredOrientations([
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
     ]);
@@ -133,6 +132,8 @@ class _NivelIntermedioState extends State<NivelIntermedio> {
                   ),
                 ),
               ),
+
+
               Positioned(
                 top: 12,
                 right: 12,
@@ -142,16 +143,21 @@ class _NivelIntermedioState extends State<NivelIntermedio> {
                     shape: BoxShape.circle,
                   ),
                   child: IconButton(
-                    icon: const Icon(Icons.close, color: Colors.white, size: 26),
+                    icon: const Icon(
+                      Icons.close,
+                      color: Colors.white,
+                      size: 26,
+                    ),
                     onPressed: () {
                       _controller?.pause();
                       _controller?.dispose();
 
-                      // Volver a Vertical al cerrar
                       SystemChrome.setPreferredOrientations([
                         DeviceOrientation.portraitUp,
                       ]);
-                      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+                      SystemChrome.setEnabledSystemUIMode(
+                        SystemUiMode.edgeToEdge,
+                      );
 
                       Navigator.of(context).pop();
                     },
@@ -163,8 +169,11 @@ class _NivelIntermedioState extends State<NivelIntermedio> {
         );
       },
     ).then((_) {
+
       _controller?.dispose();
-      SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+      ]);
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     });
   }

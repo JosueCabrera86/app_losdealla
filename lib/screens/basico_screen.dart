@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+import 'package:flutter/services.dart';
 
 class NivelBasico extends StatefulWidget {
   final List<dynamic> material;
@@ -111,68 +112,92 @@ class _NivelBasicoState extends State<NivelBasico> {
       base.where((m) => (m['categoria'] ?? 0) <= widget.nivelUsuario).toList();
 
   void abrirRutina(Map<String, dynamic> rutina) {
-    if (rutina['tipo'] == 'video') {
-      final videoId = rutina['video'];
-      _controller = YoutubePlayerController(
-        initialVideoId: videoId,
-        flags: const YoutubePlayerFlags(autoPlay: true, mute: false),
-      );
+    if (rutina['tipo'] != 'video') return;
 
-      showGeneralDialog(
-        context: context,
-        barrierDismissible: true,
-        barrierLabel: "Cerrar",
-        barrierColor: Colors.black.withOpacity(0.7),
-        transitionDuration: const Duration(milliseconds: 200),
-        pageBuilder: (context, anim1, anim2) {
-          return OrientationBuilder(
-            builder: (context, orientation) {
-              final bool isLandscape = orientation == Orientation.landscape;
+    final videoId = rutina['video'];
 
-              return Center(
-                child: Container(
-                  width: isLandscape
-                      ? MediaQuery.of(context).size.width
-                      : MediaQuery.of(context).size.width * 0.9,
-                  height: isLandscape
-                      ? MediaQuery.of(context).size.height
-                      : MediaQuery.of(context).size.height * 0.6,
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.black,
-                    borderRadius:
-                    isLandscape ? null : BorderRadius.circular(20),
-                  ),
-                  child: Stack(
-                    children: [
-                      Center(
-                        child: YoutubePlayer(
-                          controller: _controller!,
-                          showVideoProgressIndicator: true,
-                        ),
-                      ),
-                      Positioned(
-                        top: 10,
-                        right: 10,
-                        child: IconButton(
-                          icon: const Icon(Icons.close,
-                              color: Colors.white, size: 28),
-                          onPressed: () {
-                            _controller?.pause();
-                            Navigator.of(context).pop();
-                            _controller?.dispose();
-                          },
-                        ),
-                      ),
-                    ],
+
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+
+    _controller = YoutubePlayerController(
+      initialVideoId: videoId,
+      flags: const YoutubePlayerFlags(
+        autoPlay: true,
+        mute: false,
+        forceHD: true,
+      ),
+    );
+
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: "Cerrar",
+      barrierColor: Colors.black.withOpacity(0.85),
+      transitionDuration: const Duration(milliseconds: 200),
+      pageBuilder: (context, anim1, anim2) {
+        return SafeArea(
+          child: Stack(
+            children: [
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: AspectRatio(
+                    aspectRatio: 16 / 9,
+                    child: YoutubePlayer(
+                      controller: _controller!,
+                      showVideoProgressIndicator: true,
+                    ),
                   ),
                 ),
-              );
-            },
-          );
-        },
-      );
-    }
+              ),
+
+
+              Positioned(
+                top: 12,
+                right: 12,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.6),
+                    shape: BoxShape.circle,
+                  ),
+                  child: IconButton(
+                    icon: const Icon(
+                      Icons.close,
+                      color: Colors.white,
+                      size: 26,
+                    ),
+                    onPressed: () {
+                      _controller?.pause();
+                      _controller?.dispose();
+
+                      SystemChrome.setPreferredOrientations([
+                        DeviceOrientation.portraitUp,
+                      ]);
+                      SystemChrome.setEnabledSystemUIMode(
+                        SystemUiMode.edgeToEdge,
+                      );
+
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    ).then((_) {
+
+      _controller?.dispose();
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+      ]);
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    });
   }
 
   @override
