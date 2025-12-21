@@ -136,11 +136,15 @@ class _VipCasinoScreenState extends State<VipCasinoScreen> {
                   fit: BoxFit.cover,
                   alignment: Alignment(0, 0),
                 ),
+
+
                 Container(
                   width: double.infinity,
                   height: portadaHeight,
                   color: Colors.black.withOpacity(0.5),
                 ),
+
+
                 Positioned.fill(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -166,16 +170,33 @@ class _VipCasinoScreenState extends State<VipCasinoScreen> {
                     ],
                   ),
                 ),
+
+
+                Positioned(
+                  top: MediaQuery.of(context).padding.top + 10,
+                  left: 10,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.3),
+                      shape: BoxShape.circle,
+                    ),
+                    child: IconButton(
+                      icon: const Icon(Icons.arrow_back, color: Colors.white, size: 28),
+                      onPressed: () {
+                        Navigator.of(context).pushReplacementNamed('/home');
+                      },
+                    ),
+                  ),
+                ),
               ],
             ),
-
             const SizedBox(height: 20),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Text(
                 '¡Hola! Este espacio está diseñado para acompañarte en tu proceso de formación en Casino (Salsa cubana) y fortalecer tu práctica.',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16, color: Colors.deepPurple[500]),
+                style: TextStyle(fontSize: 16, color: Colors.deepPurple[600]),
               ),
             ),
             const SizedBox(height: 20),

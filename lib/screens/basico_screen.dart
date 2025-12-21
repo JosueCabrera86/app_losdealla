@@ -113,9 +113,7 @@ class _NivelBasicoState extends State<NivelBasico> {
 
   void abrirRutina(Map<String, dynamic> rutina) {
     if (rutina['tipo'] != 'video') return;
-
     final videoId = rutina['video'];
-
 
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.landscapeLeft,
@@ -154,8 +152,6 @@ class _NivelBasicoState extends State<NivelBasico> {
                   ),
                 ),
               ),
-
-
               Positioned(
                 top: 12,
                 right: 12,
@@ -165,22 +161,12 @@ class _NivelBasicoState extends State<NivelBasico> {
                     shape: BoxShape.circle,
                   ),
                   child: IconButton(
-                    icon: const Icon(
-                      Icons.close,
-                      color: Colors.white,
-                      size: 26,
-                    ),
+                    icon: const Icon(Icons.close, color: Colors.white, size: 26),
                     onPressed: () {
                       _controller?.pause();
                       _controller?.dispose();
-
-                      SystemChrome.setPreferredOrientations([
-                        DeviceOrientation.portraitUp,
-                      ]);
-                      SystemChrome.setEnabledSystemUIMode(
-                        SystemUiMode.edgeToEdge,
-                      );
-
+                      SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+                      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
                       Navigator.of(context).pop();
                     },
                   ),
@@ -191,11 +177,8 @@ class _NivelBasicoState extends State<NivelBasico> {
         );
       },
     ).then((_) {
-
       _controller?.dispose();
-      SystemChrome.setPreferredOrientations([
-        DeviceOrientation.portraitUp,
-      ]);
+      SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     });
   }
@@ -208,101 +191,66 @@ class _NivelBasicoState extends State<NivelBasico> {
 
   @override
   Widget build(BuildContext context) {
-    final paddingLateral = 8.0;
-
-    return Column(
-      children: [
-        ElevatedButton(
-          onPressed: widget.onClose,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.deepPurpleAccent,
-            foregroundColor: Colors.white,
+    return Container(
+      color: const Color(0xFFF5F5F5), // Color de fondo igual al avanzado
+      child: Column(
+        children: [
+          ElevatedButton(
+            onPressed: widget.onClose,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.deepPurpleAccent,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Cerrar Nivel Básico'),
           ),
-          child: const Text('Cerrar Nivel Básico'),
-        ),
-        const SizedBox(height: 12),
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: paddingLateral),
-          child: GridView.builder(
+          const SizedBox(height: 12),
+          ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             itemCount: filtrado.length,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              mainAxisSpacing: 8,
-              crossAxisSpacing: 8,
-              childAspectRatio: 16 / 9,
-            ),
             itemBuilder: (context, index) {
               final rutina = filtrado[index];
-              final bool esPDF = rutina['tipo'] == 'pdf';
-              final String? videoId = !esPDF ? rutina['video'] : null;
-              final String? thumbnailUrl = videoId != null
-                  ? 'https://img.youtube.com/vi/$videoId/hqdefault.jpg'
-                  : null;
+              final videoId = rutina['video'];
 
-              return GestureDetector(
-                onTap: () => abrirRutina(rutina),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      Container(color: Colors.grey[300]),
-
-                      // Mostrar portada local si existe
-                      if (rutina['portada'] != null)
-                        Image.asset(
-                          'assets/imgminis/miniyf/${rutina['portada']}',
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) =>
-                              Image.network(
-                                thumbnailUrl ??
-                                    'https://img.youtube.com/vi/$videoId/hqdefault.jpg',
-                                fit: BoxFit.cover,
-                              ),
-                        )
-                      else if (esPDF)
-                        Image.asset(
-                          'assets/images/pdf_thumb.jpg',
-                          fit: BoxFit.cover,
-                        )
-                      else
-                        Image.network(
-                          thumbnailUrl ??
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+                child: AspectRatio(
+                  aspectRatio: 16 / 9,
+                  child: GestureDetector(
+                    onTap: () => abrirRutina(rutina),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          // 🎞️ Portada
+                          Image.asset(
+                            'assets/imgminis/miniyf/${rutina['portada']}',
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => Image.network(
                               'https://img.youtube.com/vi/$videoId/hqdefault.jpg',
-                          fit: BoxFit.cover,
-                        ),
-
-                      Container(color: Colors.black.withOpacity(0.3)),
-
-                      Align(
-                        alignment: Alignment.center,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            if (!esPDF)
-                              const Icon(Icons.play_circle_fill,
-                                  color: Colors.white, size: 50),
-                            // ❌ títulos ocultos (están en la portada)
-                            // const SizedBox(height: 6),
-                            // Text(rutina['title'], ... )
-                            if (esPDF)
-                              const Text(
-                                'PDF',
-                                style: TextStyle(color: Colors.white70),
-                              ),
-                          ],
-                        ),
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                          Container(color: Colors.black.withOpacity(0.35)),
+                          const Center(
+                            child: Icon(
+                              Icons.play_circle_fill,
+                              color: Colors.white,
+                              size: 60,
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
               );
             },
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

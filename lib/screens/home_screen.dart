@@ -11,14 +11,13 @@ class _HomeScreenState extends State<HomeScreen>
     with SingleTickerProviderStateMixin {
   bool _showContent = false;
   final Color colorPurple = const Color(0xFF660099);
+  final Color colorFondo = const Color(0xFFEDCBF6);
 
   @override
   void initState() {
     super.initState();
     Future.delayed(const Duration(milliseconds: 300), () {
-      setState(() {
-        _showContent = true;
-      });
+      if (mounted) setState(() => _showContent = true);
     });
   }
 
@@ -26,13 +25,18 @@ class _HomeScreenState extends State<HomeScreen>
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final isLandscape = size.width > size.height;
-    final imageSize = isLandscape ? size.width * 0.25 : size.width * 0.35;
-    final padding = isLandscape ? 32.0 : 24.0;
+
+    // Mejoramos el cálculo del tamaño para que no crezca infinitamente
+    final double maxContentWidth = 600;
+    final double imageSize = isLandscape
+        ? (size.width * 0.2).clamp(100.0, 180.0)
+        : (size.width * 0.45).clamp(120.0, 200.0);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFEDCBF6),
+      backgroundColor: colorFondo,
       appBar: AppBar(
-        toolbarHeight: 90,
+        automaticallyImplyLeading: false,
+        toolbarHeight: isLandscape ? 70 : 90,
         centerTitle: true,
         title: const Text(
           'Material Adicional',
@@ -43,90 +47,72 @@ class _HomeScreenState extends State<HomeScreen>
           ),
         ),
         backgroundColor: const Color(0xFF4B0082),
-        elevation: 4,
+        elevation: 0, // AppBar plano para un look más moderno
       ),
       body: Center(
         child: SingleChildScrollView(
-          padding: EdgeInsets.all(padding),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                '¡Nos da mucho gusto que estés aquí!',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: size.width * 0.05,
-                  fontWeight: FontWeight.bold,
-                  color: colorPurple,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: maxContentWidth),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  '¡Nos da mucho gusto que estés aquí!',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: (size.width * 0.05).clamp(18.0, 24.0),
+                    fontWeight: FontWeight.bold,
+                    color: colorPurple,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Te damos la bienvenida a este espacio que ha sido creado para que puedas complementar y dar continuidad a tu práctica.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: size.width * 0.04,
-                  color: Colors.purple,
-                  fontWeight: FontWeight.bold,
-
+                const SizedBox(height: 12),
+                Text(
+                  'Te damos la bienvenida a este espacio creado para complementar tu práctica.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: (size.width * 0.04).clamp(14.0, 18.0),
+                    color: colorPurple.withOpacity(0.8),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 40),
+                const SizedBox(height: 40),
 
-              if (isLandscape)
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                // Lógica de Layout refinada
+                isLandscape
+                    ? Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: _buildOption(
-                        context,
-                        image: 'assets/images/yoga_facial.jpg',
-                        label: 'Yoga Facial',
-                        width: imageSize,
-                        route: '/loginYoga',
-                        alignBottom: true, // 🔸 Centra visualmente
-                      ),
-                    ),
-                    const SizedBox(width: 30),
-                    Expanded(
-                      child: _buildOption(
-                        context,
-                        image: 'assets/images/casino.jpg',
-                        label: 'Formación de profesores\nCasino (Salsa Cubana)',
-                        width: imageSize,
-                        route: '/loginCasino',
-                        alignBottom: true,
-                      ),
-                    ),
-                  ],
+                  children: _buildOptionsList(context, imageSize),
                 )
-              else
-                Column(
-                  children: [
-                    _buildOption(
-                      context,
-                      image: 'assets/images/yoga_facial.jpg',
-                      label: 'Yoga Facial',
-                      width: imageSize,
-                      route: '/loginYoga',
-                    ),
-                    const SizedBox(height: 30),
-                    _buildOption(
-                      context,
-                      image: 'assets/images/casino.jpg',
-                      label:
-                      'Formación de profesores\nCasino (Salsa Cubana)',
-                      width: imageSize,
-                      route: '/loginCasino',
-                    ),
-                  ],
+                    : Column(
+                  children: _buildOptionsList(context, imageSize),
                 ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
     );
+  }
+
+  List<Widget> _buildOptionsList(BuildContext context, double imageSize) {
+    return [
+      _buildOption(
+        context,
+        image: 'assets/images/yoga_facial.jpg',
+        label: 'Yoga Facial',
+        width: imageSize,
+        route: '/loginYoga',
+      ),
+      const SizedBox(width: 20, height: 30),
+      _buildOption(
+        context,
+        image: 'assets/images/casino.jpg',
+        label: 'Casino\n(Salsa Cubana)',
+        width: imageSize,
+        route: '/loginCasino',
+      ),
+    ];
   }
 
   Widget _buildOption(
@@ -135,46 +121,58 @@ class _HomeScreenState extends State<HomeScreen>
         required String label,
         required double width,
         required String route,
-        bool alignBottom = false,
       }) {
     return Column(
       mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment:
-      alignBottom ? MainAxisAlignment.center : MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         AnimatedOpacity(
           opacity: _showContent ? 1 : 0,
-          duration: const Duration(seconds: 1),
+          duration: const Duration(milliseconds: 800),
           child: AnimatedScale(
-            scale: _showContent ? 1 : 0.8,
-            duration: const Duration(seconds: 1),
+            scale: _showContent ? 1 : 0.9,
+            duration: const Duration(milliseconds: 800),
             curve: Curves.easeOutBack,
-            child: InkWell(
-              borderRadius: BorderRadius.circular(12),
-              onTap: () => Navigator.pushNamed(context, route),
-              splashColor: Colors.purple.withOpacity(0.2),
-              highlightColor: Colors.purple.withOpacity(0.1),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Image.asset(
-                  image,
-                  width: width,
-                  height: width,
-                  fit: BoxFit.cover,
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 10,
+                    offset: const Offset(0, 5),
+                  )
+                ],
+              ),
+              child: InkWell(
+                onTap: () => Navigator.pushNamed(context, route),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: Image.asset(
+                    image,
+                    width: width,
+                    height: width,
+                    fit: BoxFit.cover,
+                    // Agregamos un placeholder por si la imagen tarda en cargar
+                    errorBuilder: (context, error, stackTrace) => Container(
+                      width: width,
+                      height: width,
+                      color: Colors.grey[300],
+                      child: const Icon(Icons.image_not_supported),
+                    ),
+                  ),
                 ),
               ),
             ),
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 12),
         Text(
           label,
           textAlign: TextAlign.center,
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            fontSize: width * 0.11,
-            color: const Color(0xFF660099),
+            fontSize: (width * 0.12).clamp(14.0, 18.0),
+            color: colorPurple,
           ),
         ),
       ],

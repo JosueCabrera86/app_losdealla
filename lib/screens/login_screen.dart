@@ -1,8 +1,6 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
 
 class LoginScreen extends StatefulWidget {
   final String tipo;
@@ -21,6 +19,11 @@ class _LoginScreenState extends State<LoginScreen> {
   bool loading = false;
   String? error;
 
+  // Colores definidos para consistencia
+  final colorLilaProfundo = const Color(0xFF660099);
+  final colorFondoLila = const Color(0xFFEDCBF6);
+  final colorBlancoHueso = const Color(0xFFF9F9F9);
+
   Future<void> handleSubmit() async {
     final email = emailController.text.trim();
     final password = passwordController.text.trim();
@@ -38,7 +41,6 @@ class _LoginScreenState extends State<LoginScreen> {
     final supabase = Supabase.instance.client;
 
     try {
-
       final AuthResponse res = await supabase.auth.signInWithPassword(
         email: email,
         password: password,
@@ -51,14 +53,8 @@ class _LoginScreenState extends State<LoginScreen> {
         setState(() => error = 'Credenciales incorrectas');
         return;
       }
-      debugPrint('Auth user: ${user?.id}');
-      debugPrint('Session: ${session?.accessToken != null}');
 
-
-      await storage.write(
-        key: 'token',
-        value: session.accessToken,
-      );
+      await storage.write(key: 'token', value: session.accessToken);
 
       final profile = await supabase
           .from('users')
@@ -66,17 +62,11 @@ class _LoginScreenState extends State<LoginScreen> {
           .eq('auth_id', user.id)
           .single();
 
-      final rol = profile['rol'];
-      final disciplina = profile['disciplina'];
-
-
-
       await storage.write(key: 'user_id', value: profile['id'].toString());
       await storage.write(key: 'user_email', value: user.email);
-      await storage.write(key: 'user_categoria',value: profile['categoria'].toString(),);
-      await storage.write(key: 'user_disciplina', value: disciplina);
-      await storage.write(key: 'user_rol', value: rol);
-
+      await storage.write(key: 'user_categoria', value: profile['categoria'].toString());
+      await storage.write(key: 'user_disciplina', value: profile['disciplina']);
+      await storage.write(key: 'user_rol', value: profile['rol']);
 
       if (widget.tipo == 'casino') {
         Navigator.pushReplacementNamed(context, '/vipcasino');
@@ -94,138 +84,150 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colorLila = const Color(0xFF660099);
-    final colorAzul = const Color(0xFFF9F9F9);
-
     final size = MediaQuery.of(context).size;
     final isLandscape = size.width > size.height;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFEDCBF6),
+      backgroundColor: colorFondoLila,
       appBar: AppBar(
-        toolbarHeight: 90,
+        // Altura reducida en móviles para mejor visibilidad al abrir teclado
+        toolbarHeight: isLandscape ? 70 : 85,
         centerTitle: true,
         iconTheme: const IconThemeData(color: Colors.white),
-        backgroundColor: colorLila,
+        backgroundColor: colorLilaProfundo,
+        elevation: 0,
         title: Column(
-          mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
+            const Text(
               'Material Adicional',
-              style: TextStyle(
-                color: colorAzul,
-                fontSize: 18,
-                  fontWeight: FontWeight.bold ),
+              style: TextStyle(color: Colors.white70, fontSize: 18),
             ),
             Text(
               widget.tipo == 'casino' ? 'Casino' : 'Yoga Facial',
-              style: TextStyle(
-                color: colorAzul,
+              style: const TextStyle(
+                color: Colors.white,
                 fontWeight: FontWeight.bold,
                 fontSize: 20,
               ),
             ),
           ],
         ),
-
-
-
       ),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          double paddingHorizontal = isLandscape ? size.width * 0.2 : 24.0;
-          double fontSizeTitle = isLandscape ? 18 : 20;
-          double inputFontSize = isLandscape ? 14 : 16;
-
-          return Center(
-            child: SingleChildScrollView(
-              padding: EdgeInsets.symmetric(horizontal: paddingHorizontal, vertical: 16),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 500),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const SizedBox(height: 10),
-                    Text(
-                      'Inicia sesión para continuar',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: fontSizeTitle,
-                        fontWeight: FontWeight.bold,
-                        color: colorLila,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    TextField(
-                      controller: emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      style: TextStyle(fontSize: inputFontSize),
-                      decoration: InputDecoration(
-                        hintText: 'Email',
-                        hintStyle: TextStyle(color: colorLila.withOpacity(0.6)),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: colorLila),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: colorAzul, width: 2),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: passwordController,
-                      obscureText: !showPassword,
-                      style: TextStyle(fontSize: inputFontSize),
-                      decoration: InputDecoration(
-                        hintText: 'Contraseña',
-                        hintStyle: TextStyle(color: colorLila.withOpacity(0.6)),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            showPassword ? Icons.visibility_off : Icons.visibility,
-                            color: colorLila,
-                          ),
-                          onPressed: () => setState(() => showPassword = !showPassword),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: colorLila),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: colorAzul, width: 2),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    if (error != null)
-                      Text(
-                        error!,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(color: Colors.red, fontSize: 14),
-                      ),
-                    const SizedBox(height: 24),
-                    ElevatedButton(
-                      onPressed: loading ? null : handleSubmit,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: colorLila,
-                        padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      ),
-                      child: loading
-                          ? const CircularProgressIndicator(color: Colors.white)
-                          : const Text(
-                        'Iniciar sesión',
-                        style: TextStyle(color: Colors.white, fontSize: 16),
-                      ),
-                    ),
-                  ],
+      body: Center(
+        child: SingleChildScrollView(
+          padding: EdgeInsets.symmetric(
+            horizontal: isLandscape ? size.width * 0.15 : 24.0,
+            vertical: 20,
+          ),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 450),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'Bienvenid@',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: isLandscape ? 22 : 26,
+                    fontWeight: FontWeight.bold,
+                    color: colorLilaProfundo,
+                  ),
                 ),
-              ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Inicia sesión para continuar',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.black54, fontSize: 16),
+                ),
+                const SizedBox(height: 32),
+
+
+                TextField(
+                  controller: emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: InputDecoration(
+                    labelText: 'Email',
+                    prefixIcon: Icon(Icons.email_outlined, color: colorLilaProfundo),
+                    filled: true,
+                    fillColor: Colors.white70,
+                    labelStyle: TextStyle(color: colorLilaProfundo),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: colorLilaProfundo.withOpacity(0.3)),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: colorLilaProfundo, width: 2),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+
+                TextField(
+                  controller: passwordController,
+                  obscureText: !showPassword,
+                  decoration: InputDecoration(
+                    labelText: 'Contraseña',
+                    prefixIcon: Icon(Icons.lock_outline, color: colorLilaProfundo),
+                    filled: true,
+                    fillColor: Colors.white70,
+                    labelStyle: TextStyle(color: colorLilaProfundo),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        showPassword ? Icons.visibility_off : Icons.visibility,
+                        color: colorLilaProfundo,
+                      ),
+                      onPressed: () => setState(() => showPassword = !showPassword),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: colorLilaProfundo.withOpacity(0.3)),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: colorLilaProfundo, width: 2),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+
+                if (error != null) ...[
+                  const SizedBox(height: 16),
+                  Text(
+                    error!,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.w600),
+                  ),
+                ],
+
+                const SizedBox(height: 32),
+
+
+                ElevatedButton(
+                  onPressed: loading ? null : handleSubmit,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: colorLilaProfundo,
+                    foregroundColor: Colors.white,
+                    elevation: 2,
+                    padding: const EdgeInsets.all(16),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: loading
+                      ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                  )
+                      : const Text(
+                    'Entrar',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
             ),
-          );
-        },
+          ),
+        ),
       ),
     );
   }

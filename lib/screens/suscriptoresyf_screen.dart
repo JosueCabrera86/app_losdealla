@@ -147,7 +147,7 @@ class _SuscriptoresYFScreenState extends State<SuscriptoresYFScreen> {
                 Container(
                   width: double.infinity,
                   height: portadaHeight,
-                  color: Colors.black.withOpacity(0.4),
+                  color: Colors.black.withOpacity(0.5),
                 ),
                 Positioned.fill(
                   child: Column(
@@ -174,6 +174,22 @@ class _SuscriptoresYFScreenState extends State<SuscriptoresYFScreen> {
                     ],
                   ),
                 ),
+                Positioned(
+                  top: MediaQuery.of(context).padding.top + 10, // Para que no choque con el reloj del cel
+                  left: 10,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.3), // Un circulo sutil de fondo
+                      shape: BoxShape.circle,
+                    ),
+                    child: IconButton(
+                      icon: const Icon(Icons.arrow_back, color: Colors.white, size: 28),
+                      onPressed: () {
+                        Navigator.of(context).pushReplacementNamed('/home');
+                      },
+                    ),
+                  ),
+                ),
               ],
             ),
 
@@ -183,7 +199,7 @@ class _SuscriptoresYFScreenState extends State<SuscriptoresYFScreen> {
               child: Text(
                 '¡Hola! Este espacio ha sido creado para que continúes con tus sesiones de Yoga Facial y profundices tu práctica.',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16, color: Colors.deepPurple[400]),
+                style: TextStyle(fontSize: 16, color: Colors.deepPurple[600]),
               ),
             ),
             const SizedBox(height: 20),

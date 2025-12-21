@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // Importante para el control de orientación
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class NivelPrincipiante extends StatefulWidget {
@@ -48,68 +49,90 @@ class _NivelPrincipianteState extends State<NivelPrincipiante> {
       base.where((m) => (m['categoria'] ?? 0) <= widget.nivelUsuario).toList();
 
   void abrirRutina(Map<String, dynamic> rutina) {
-    if (rutina['tipo'] == 'video') {
-      final videoId = rutina['video'];
-      _controller = YoutubePlayerController(
-        initialVideoId: videoId,
-        flags: const YoutubePlayerFlags(autoPlay: true, mute: false),
-      );
+    if (rutina['tipo'] != 'video') return;
 
-      showGeneralDialog(
-        context: context,
-        barrierDismissible: true,
-        barrierLabel: "Cerrar",
-        barrierColor: Colors.black.withOpacity(0.7),
-        transitionDuration: const Duration(milliseconds: 200),
-        pageBuilder: (context, anim1, anim2) {
-          return OrientationBuilder(
-            builder: (context, orientation) {
-              final bool isLandscape = orientation == Orientation.landscape;
+    final videoId = rutina['video'];
 
-              return Center(
-                child: Container(
-                  width: isLandscape
-                      ? MediaQuery.of(context).size.width
-                      : MediaQuery.of(context).size.width * 0.9,
-                  height: isLandscape
-                      ? MediaQuery.of(context).size.height
-                      : MediaQuery.of(context).size.height * 0.6,
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.black,
-                    borderRadius:
-                    isLandscape ? null : BorderRadius.circular(20),
-                  ),
-                  child: Stack(
-                    children: [
-                      Center(
-                        child: YoutubePlayer(
-                          controller: _controller!,
-                          showVideoProgressIndicator: true,
-                        ),
-                      ),
-                      Positioned(
-                        top: 10,
-                        right: 10,
-                        child: IconButton(
-                          icon: const Icon(Icons.close,
-                              color: Colors.white, size: 28),
-                          onPressed: () {
-                            _controller?.pause();
-                            Navigator.of(context).pop();
-                            _controller?.dispose();
-                          },
-                        ),
-                      ),
-                    ],
+    // Configurar orientación horizontal para el video
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+
+    _controller = YoutubePlayerController(
+      initialVideoId: videoId,
+      flags: const YoutubePlayerFlags(
+        autoPlay: true,
+        mute: false,
+        forceHD: true,
+      ),
+    );
+
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: "Cerrar",
+      barrierColor: Colors.black.withOpacity(0.85),
+      transitionDuration: const Duration(milliseconds: 200),
+      pageBuilder: (context, anim1, anim2) {
+        return SafeArea(
+          child: Stack(
+            children: [
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: AspectRatio(
+                    aspectRatio: 16 / 9,
+                    child: YoutubePlayer(
+                      controller: _controller!,
+                      showVideoProgressIndicator: true,
+                    ),
                   ),
                 ),
-              );
-            },
-          );
-        },
-      );
-    }
+              ),
+              Positioned(
+                top: 12,
+                right: 12,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.6),
+                    shape: BoxShape.circle,
+                  ),
+                  child: IconButton(
+                    icon: const Icon(
+                      Icons.close,
+                      color: Colors.white,
+                      size: 26,
+                    ),
+                    onPressed: () {
+                      _controller?.pause();
+                      _controller?.dispose();
+
+                      // Volver a vertical
+                      SystemChrome.setPreferredOrientations([
+                        DeviceOrientation.portraitUp,
+                      ]);
+                      SystemChrome.setEnabledSystemUIMode(
+                        SystemUiMode.edgeToEdge,
+                      );
+
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    ).then((_) {
+      _controller?.dispose();
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+      ]);
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    });
   }
 
   @override
@@ -120,98 +143,66 @@ class _NivelPrincipianteState extends State<NivelPrincipiante> {
 
   @override
   Widget build(BuildContext context) {
-    final paddingLateral = 8.0;
-
-    return Column(
-      children: [
-        ElevatedButton(
-          onPressed: widget.onClose,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.deepPurpleAccent,
-            foregroundColor: Colors.white,
+    return Container(
+      color: const Color(0xFFF5F5F5), // Mismo fondo que Avanzado
+      child: Column(
+        children: [
+          ElevatedButton(
+            onPressed: widget.onClose,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.deepPurpleAccent,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Cerrar Nivel Principiante'),
           ),
-          child: const Text('Cerrar Nivel Principiante'),
-        ),
-        const SizedBox(height: 12),
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: paddingLateral),
-          child: GridView.builder(
+          const SizedBox(height: 12),
+          ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             itemCount: filtrado.length,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              mainAxisSpacing: 8,
-              crossAxisSpacing: 8,
-              childAspectRatio: 16 / 9,
-            ),
             itemBuilder: (context, index) {
               final rutina = filtrado[index];
-              final bool esPDF = rutina['tipo'] == 'pdf';
-              final String? videoId = !esPDF ? rutina['video'] : null;
-              final String? thumbnailUrl = videoId != null
-                  ? 'https://img.youtube.com/vi/$videoId/hqdefault.jpg'
-                  : null;
+              final videoId = rutina['video'];
 
-              return GestureDetector(
-                onTap: () => abrirRutina(rutina),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      Container(color: Colors.grey[300]),
-
-                      // Mostrar portada local si existe
-                      if (rutina['portada'] != null)
-                        Image.asset(
-                          'assets/imgminis/miniyf/${rutina['portada']}',
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) =>
-                              Image.network(
-                                thumbnailUrl ??
-                                    'https://img.youtube.com/vi/$videoId/hqdefault.jpg',
-                                fit: BoxFit.cover,
-                              ),
-                        )
-                      else if (esPDF)
-                        Image.asset(
-                          'assets/images/pdf_thumb.jpg',
-                          fit: BoxFit.cover,
-                        )
-                      else
-                        Image.network(
-                          thumbnailUrl ??
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+                child: AspectRatio(
+                  aspectRatio: 16 / 9,
+                  child: GestureDetector(
+                    onTap: () => abrirRutina(rutina),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          // 🎞️ Portada local con fallback a red
+                          Image.asset(
+                            'assets/imgminis/miniyf/${rutina['portada']}',
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => Image.network(
                               'https://img.youtube.com/vi/$videoId/hqdefault.jpg',
-                          fit: BoxFit.cover,
-                        ),
-
-                      Container(color: Colors.black.withOpacity(0.3)),
-
-                      Align(
-                        alignment: Alignment.center,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            if (!esPDF)
-                              const Icon(Icons.play_circle_fill,
-                                  color: Colors.white, size: 50),
-                            if (esPDF)
-                              const Text(
-                                'PDF',
-                                style: TextStyle(color: Colors.white70),
-                              ),
-                          ],
-                        ),
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                          Container(color: Colors.black.withOpacity(0.35)),
+                          const Center(
+                            child: Icon(
+                              Icons.play_circle_fill,
+                              color: Colors.white,
+                              size: 60,
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
               );
             },
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
