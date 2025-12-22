@@ -10,8 +10,8 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen>
     with SingleTickerProviderStateMixin {
   bool _showContent = false;
-  final Color colorPurple = const Color(0xFF660099);
-  final Color colorFondo = const Color(0xFFEDCBF6);
+  final Color colorPurple = const Color(0xFF512DA8);
+  final Color colorFondo = const Color(0xFFF3E5F5);
 
   @override
   void initState() {
@@ -26,7 +26,7 @@ class _HomeScreenState extends State<HomeScreen>
     final size = MediaQuery.of(context).size;
     final isLandscape = size.width > size.height;
 
-    // Mejoramos el cálculo del tamaño para que no crezca infinitamente
+
     final double maxContentWidth = 600;
     final double imageSize = isLandscape
         ? (size.width * 0.2).clamp(100.0, 180.0)
@@ -46,8 +46,8 @@ class _HomeScreenState extends State<HomeScreen>
             fontSize: 22,
           ),
         ),
-        backgroundColor: const Color(0xFF4B0082),
-        elevation: 0, // AppBar plano para un look más moderno
+        backgroundColor: const Color(0xFF512DA8),
+        elevation: 0,
       ),
       body: Center(
         child: SingleChildScrollView(

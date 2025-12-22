@@ -1,10 +1,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <application
-        android:label="app_losdealla"
+        android:label="Rueda de conocimientos"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/launcher_icon">
         <activity
-            android:name=".MainActivity"
+            android:name="com.ruedadeconocimientos.losdealla.MainActivity"
             android:exported="true"
             android:launchMode="singleTop"
             android:taskAffinity=""

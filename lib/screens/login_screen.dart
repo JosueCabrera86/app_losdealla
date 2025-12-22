@@ -20,8 +20,8 @@ class _LoginScreenState extends State<LoginScreen> {
   String? error;
 
   // Colores definidos para consistencia
-  final colorLilaProfundo = const Color(0xFF660099);
-  final colorFondoLila = const Color(0xFFEDCBF6);
+  final colorLilaProfundo = const Color(0xFF512DA8);
+  final colorFondoLila = const Color(0xFFF3E5F5);
   final colorBlancoHueso = const Color(0xFFF9F9F9);
 
   Future<void> handleSubmit() async {
