@@ -54,7 +54,6 @@ class _LoginScreenState extends State<LoginScreen> {
         return;
       }
 
-      await storage.write(key: 'token', value: session.accessToken);
 
       final profile = await supabase
           .from('users')
@@ -62,17 +61,29 @@ class _LoginScreenState extends State<LoginScreen> {
           .eq('auth_id', user.id)
           .single();
 
+
+      final disciplinaUsuario = profile['disciplina']?.toString().trim().toLowerCase() ?? '';
+      final disciplinaPantalla = widget.tipo.trim().toLowerCase();
+
+      if (!disciplinaUsuario.contains(disciplinaPantalla) && !disciplinaPantalla.contains(disciplinaUsuario)) {
+        await supabase.auth.signOut();
+        setState(() => error = 'Tu cuenta pertenece a otra disciplina.');
+        return;
+      }
+
+      await storage.write(key: 'token', value: session.accessToken);
       await storage.write(key: 'user_id', value: profile['id'].toString());
       await storage.write(key: 'user_email', value: user.email);
       await storage.write(key: 'user_categoria', value: profile['categoria'].toString());
       await storage.write(key: 'user_disciplina', value: profile['disciplina']);
       await storage.write(key: 'user_rol', value: profile['rol']);
 
-      if (widget.tipo == 'casino') {
+
+      if (disciplinaPantalla.contains('casino')) {
         Navigator.pushReplacementNamed(context, '/vipcasino');
-      } else {
-        Navigator.pushReplacementNamed(context, '/suscriptoresyf');
-      }
+      } else if (disciplinaPantalla.contains('yoga')) {
+        Navigator.pushReplacementNamed(context, '/suscriptoresyf');}
+
     } on AuthException catch (e) {
       setState(() => error = e.message);
     } catch (e) {
@@ -90,7 +101,6 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       backgroundColor: colorFondoLila,
       appBar: AppBar(
-        // Altura reducida en móviles para mejor visibilidad al abrir teclado
         toolbarHeight: isLandscape ? 70 : 85,
         centerTitle: true,
         iconTheme: const IconThemeData(color: Colors.white),

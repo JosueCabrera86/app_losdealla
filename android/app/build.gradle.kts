@@ -43,7 +43,7 @@ android {
             isShrinkResources = false
         }
     }
-} // <--- ESTA ES LA LLAVE QUE FALTABA PARA CERRAR EL BLOQUE 'android'
+}
 
 flutter {
     source = "../.."

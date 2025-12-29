@@ -21,7 +21,7 @@ class _InfoScreenState extends State<InfoScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFEDCBF6),
+      backgroundColor: const Color(0xFFF3E5F5),
       body: LayoutBuilder(
         builder: (context, constraints) {
           double scale = (constraints.maxWidth / 400).clamp(0.7, 1.2);

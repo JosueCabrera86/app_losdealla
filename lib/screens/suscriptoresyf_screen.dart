@@ -150,36 +150,47 @@ class _SuscriptoresYFScreenState extends State<SuscriptoresYFScreen> {
                   color: Colors.black.withOpacity(0.5),
                 ),
                 Positioned.fill(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      Text(
-                        'MATERIAL ADICIONAL',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 30,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1.5,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 40),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            'MATERIAL ADICIONAL',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1.5,
+                            ),
+                          ),
                         ),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        'Yoga Facial',
-                        style: TextStyle(
-                          color: Colors.pinkAccent,
-                          fontSize: 22,
-                          fontWeight: FontWeight.w600,
+                        const SizedBox(height: 8),
+                        const FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            'Yoga Facial',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Colors.pinkAccent,
+                              fontSize: 22,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
                 Positioned(
-                  top: MediaQuery.of(context).padding.top + 10, // Para que no choque con el reloj del cel
+                  top: MediaQuery.of(context).padding.top + 10,
                   left: 10,
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.3), // Un circulo sutil de fondo
+                      color: Colors.black.withOpacity(0.3),
                       shape: BoxShape.circle,
                     ),
                     child: IconButton(
@@ -195,7 +206,7 @@ class _SuscriptoresYFScreenState extends State<SuscriptoresYFScreen> {
 
             const SizedBox(height: 20),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Text(
                 '¡Hola! Este espacio ha sido creado para que continúes con tus sesiones de Yoga Facial y profundices tu práctica.',
                 textAlign: TextAlign.center,

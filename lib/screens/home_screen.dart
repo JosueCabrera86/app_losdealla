@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -13,6 +15,8 @@ class _HomeScreenState extends State<HomeScreen>
   final Color colorPurple = const Color(0xFF512DA8);
   final Color colorFondo = const Color(0xFFF3E5F5);
 
+  final storage = const FlutterSecureStorage();
+
   @override
   void initState() {
     super.initState();
@@ -21,11 +25,93 @@ class _HomeScreenState extends State<HomeScreen>
     });
   }
 
+  Future<void> _cerrarSesionGlobal() async {
+    await Supabase.instance.client.auth.signOut();
+    await storage.deleteAll();
+    if (mounted) {
+      setState(() {});
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Sesión cerrada correctamente'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    }
+  }
+  Future<void> manejarAcceso(String tipoBoton) async {
+    final supabase = Supabase.instance.client;
+    final session = supabase.auth.currentSession;
+
+    if (session != null) {
+      String? disciplinaGuardada = await storage.read(key: 'user_disciplina');
+      String disc = disciplinaGuardada?.toLowerCase() ?? '';
+
+      if (disc.contains(tipoBoton)) {
+
+        if (tipoBoton == 'casino') {
+          Navigator.pushNamed(context, '/vipcasino');
+        } else if (tipoBoton == 'yoga') {
+          Navigator.pushNamed(context, '/suscriptoresyf');
+        }
+        return;
+      } else {
+
+        _mostrarAvisoCambio(tipoBoton);
+        return;
+      }
+    }
+
+
+    _irAlLogin(tipoBoton);
+  }
+
+
+  void _mostrarAvisoCambio(String nuevaDisciplina) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        title: const Text('Sesión activa'),
+        content: Text(
+          'Ya tienes una sesión iniciada en otra disciplina.\n\n¿Deseas cerrar esa sesión para entrar a ${nuevaDisciplina == 'casino' ? 'Casino' : 'Yoga Facial'}?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: colorPurple,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () async {
+              await Supabase.instance.client.auth.signOut();
+              await storage.deleteAll();
+              if (mounted) {
+                Navigator.pop(context); // Cierra el diálogo
+                _irAlLogin(nuevaDisciplina);
+              }
+            },
+            child: const Text('Sí, cambiar'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _irAlLogin(String tipoBoton) {
+    if (tipoBoton == 'casino') {
+      Navigator.pushNamed(context, '/loginCasino');
+    } else {
+      Navigator.pushNamed(context, '/loginYoga');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final isLandscape = size.width > size.height;
-
 
     final double maxContentWidth = 600;
     final double imageSize = isLandscape
@@ -48,7 +134,39 @@ class _HomeScreenState extends State<HomeScreen>
         ),
         backgroundColor: const Color(0xFF512DA8),
         elevation: 0,
+
+        actions: [
+          PopupMenuButton<String>(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(24),
+            ),
+            elevation: 4,
+            icon: const Icon(Icons.more_vert, color: Color(0xFFF3E5F5) ),
+            onSelected: (value) {
+              if (value == 'logout') {
+                _cerrarSesionGlobal();
+              }
+            },
+            itemBuilder: (BuildContext context) => [
+              PopupMenuItem<String>(
+                value: 'logout',
+                child: Row(
+                  children: [
+                    Icon(Icons.logout, color: colorPurple),
+                    SizedBox(width: 10),
+                    Text('Cerrar Sesión',
+                    style: TextStyle(
+                      color: colorPurple,
+                    )
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
+
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
@@ -76,8 +194,6 @@ class _HomeScreenState extends State<HomeScreen>
                   ),
                 ),
                 const SizedBox(height: 40),
-
-                // Lógica de Layout refinada
                 isLandscape
                     ? Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -102,7 +218,7 @@ class _HomeScreenState extends State<HomeScreen>
         image: 'assets/images/yoga_facial.jpg',
         label: 'Yoga Facial',
         width: imageSize,
-        route: '/loginYoga',
+        tipo: 'yoga',
       ),
       const SizedBox(width: 20, height: 30),
       _buildOption(
@@ -110,7 +226,7 @@ class _HomeScreenState extends State<HomeScreen>
         image: 'assets/images/casino.jpg',
         label: 'Casino\n(Salsa Cubana)',
         width: imageSize,
-        route: '/loginCasino',
+        tipo: 'casino',
       ),
     ];
   }
@@ -120,7 +236,7 @@ class _HomeScreenState extends State<HomeScreen>
         required String image,
         required String label,
         required double width,
-        required String route,
+        required String tipo,
       }) {
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -144,7 +260,7 @@ class _HomeScreenState extends State<HomeScreen>
                 ],
               ),
               child: InkWell(
-                onTap: () => Navigator.pushNamed(context, route),
+                onTap: () => manejarAcceso(tipo),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(20),
                   child: Image.asset(
@@ -152,7 +268,6 @@ class _HomeScreenState extends State<HomeScreen>
                     width: width,
                     height: width,
                     fit: BoxFit.cover,
-                    // Agregamos un placeholder por si la imagen tarda en cargar
                     errorBuilder: (context, error, stackTrace) => Container(
                       width: width,
                       height: width,

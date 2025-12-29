@@ -146,31 +146,41 @@ class _VipCasinoScreenState extends State<VipCasinoScreen> {
 
 
                 Positioned.fill(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      Text(
-                        'MATERIAL ADICIONAL',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 30,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1.5,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 40),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            'MATERIAL ADICIONAL',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1.5,
+                            ),
+                          ),
                         ),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        'Formación de Profesores de Casino',
-                        style: TextStyle(
-                          color: Colors.cyanAccent,
-                          fontSize: 22,
-                          fontWeight: FontWeight.w600,
+                        const SizedBox(height: 8),
+                        const FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            'Formación de Profesores de Casino',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Colors.cyanAccent,
+                              fontSize: 20, // Bajamos un poco de 22
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-
 
                 Positioned(
                   top: MediaQuery.of(context).padding.top + 10,
@@ -192,7 +202,7 @@ class _VipCasinoScreenState extends State<VipCasinoScreen> {
             ),
             const SizedBox(height: 20),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Text(
                 '¡Hola! Este espacio está diseñado para acompañarte en tu proceso de formación en Casino (Salsa cubana) y fortalecer tu práctica.',
                 textAlign: TextAlign.center,
